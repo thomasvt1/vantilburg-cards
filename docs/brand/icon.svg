@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112" role="img" aria-labelledby="title">
+  <title id="title">vanTilburg Cards</title>
+  <rect width="112" height="112" rx="28" fill="#edf8f4"/>
+  <path d="M24 51 56 25 88 51" fill="none" stroke="#33866d" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 49v34h48V49" fill="#dfd2fa"/>
+  <path d="m43 57 13 17 13-17" fill="none" stroke="#7553a8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

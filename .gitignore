@@ -5,3 +5,8 @@ coverage/
 .vitest/
 .DS_Store
 *.local.*
+.local/
+.research/
+.impeccable/
+playwright-report/
+*.log

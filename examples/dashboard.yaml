@@ -1,0 +1,56 @@
+# Generic placeholders: select your own entities in each card's visual editor.
+views:
+  - title: Home
+    path: home
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: custom:home-waste-card
+            entity: sensor.collection_days
+            type_entity: sensor.collection_type
+            moved_entity: input_boolean.bin_put_out
+          - type: custom:home-house-card
+            name: House
+            meters:
+              - entity: sensor.battery_percentage
+                name: Battery
+                palette: mint
+              - entity: sensor.heat_storage_percentage
+                name: Heat
+                palette: purple
+      - type: grid
+        cards:
+          - type: custom:home-room-card
+            name: Bedroom
+            icon: mdi:bed-king-outline
+            palette: purple
+            entity: climate.bedroom
+            popup:
+              hash: '#bedroom'
+              sections:
+                - title: Lights
+                  icon: mdi:lightbulb-outline
+                  cards:
+                    - type: tile
+                      entity: light.bedroom
+                      features:
+                        - type: light-brightness
+                - title: Climate
+                  icon: mdi:thermometer
+                  cards:
+                    - type: tile
+                      entity: climate.bedroom
+                      features:
+                        - type: target-temperature
+          - type: custom:home-room-card
+            name: Hallway
+            icon: mdi:stairs
+            palette: slate
+            display: lights
+            lights:
+              - light.hallway
+            tap_action:
+              action: more-info
+              entity: light.hallway

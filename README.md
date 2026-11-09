@@ -1,30 +1,114 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/thomasvt1/vantilburg-cards/main/docs/brand/icon.svg" width="112" height="112" alt="vanTilburg Cards — a house in mint and purple">
+</p>
+
 # vanTilburg Cards
 
 Compact Home Assistant cards for room temperatures, lights, household storage and waste collection. Shared pastel palettes preserve a calm overview in light and dark themes. Each card can open a built-in popup made of reusable **sections + cards**.
 
-![Light overview](examples/desktop-light.png)
+[![CI](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/ci.yml) [![HACS](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/hacs.yml/badge.svg)](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/hacs.yml) [![Release](https://img.shields.io/github/v/release/thomasvt1/vantilburg-cards)](https://github.com/thomasvt1/vantilburg-cards/releases/latest)
+
+[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=thomasvt1&repository=vantilburg-cards&category=plugin)
 
 ## Cards
 
-| Type | Purpose |
-| --- | --- |
-| `custom:home-room-card` | Temperature from a climate entity/sensor, or a count of lights on |
-| `custom:home-house-card` | One to six named percentage sensors and progress bars |
-| `custom:home-waste-card` | Days until collection, waste type, optional bin-out flag |
+| Card | Custom element | Content |
+| --- | --- | --- |
+| Room | `custom:home-room-card` | Temperature from a climate entity/sensor, or a count of lights on. |
+| House | `custom:home-house-card` | One to six named percentage sensors and compact progress bars. |
+| Waste collection | `custom:home-waste-card` | Days until collection, waste type and an optional bin-out flag. |
 
 No backend integration is required. These cards read existing entity states. A popup's child cards retain their own actions and dependencies.
 
-## Install
+All three cards have a visual configuration editor, card-picker preview, YAML configuration, and Sections/Masonry sizing. Every card can open a built-in popup with repeated **section + content** groups. The visual editor configures both the popup and its child cards.
 
-Requires Home Assistant 2026.10 or newer and a current browser with native dialog support.
+<!-- BEGIN GENERATED EXAMPLES -->
+![All three vanTilburg cards, desktop light theme with synthetic data](examples/desktop-light.png)
 
-Add this repository as a custom dashboard-card repository in your community-card installer, then install **vanTilburg Cards**. The JavaScript release asset is `vantilburg-cards.js`.
+Full dashboards: [desktop dark](examples/desktop-dark.png) · [phone light](examples/mobile-light.png) · [phone dark](examples/mobile-dark.png)
 
-For manual installation, copy that release asset into `/config/www/vantilburg-cards.js`, then add `/local/vantilburg-cards.js?v=0.1.0` as a **JavaScript module** dashboard resource. Change the version query when updating and refresh the browser. Register only one copy of the module.
+### Card previews
+
+Synthetic readings only. Regenerate these images with `npm run update:examples`.
+
+| Card | Light theme | Dark theme |
+| --- | --- | --- |
+| Room | ![Room, light](examples/room-desktop-light.png) | ![Room, dark](examples/room-desktop-dark.png) |
+| House | ![House, light](examples/house-desktop-light.png) | ![House, dark](examples/house-desktop-dark.png) |
+| Waste collection | ![Waste collection, light](examples/waste-desktop-light.png) | ![Waste collection, dark](examples/waste-desktop-dark.png) |
+| Sectioned popup | ![Popup, light](examples/popup-desktop-light.png) | ![Popup, dark](examples/popup-desktop-dark.png) |
+
+Phone previews: Room ([light](examples/room-mobile-light.png), [dark](examples/room-mobile-dark.png)) · House ([light](examples/house-mobile-light.png), [dark](examples/house-mobile-dark.png)) · Waste collection ([light](examples/waste-mobile-light.png), [dark](examples/waste-mobile-dark.png)) · Popup ([light](examples/popup-mobile-light.png), [dark](examples/popup-mobile-dark.png))
+<!-- END GENERATED EXAMPLES -->
+
+## Requirements
+
+- Home Assistant 2026.10 or newer, matching the package's declared HACS minimum.
+- Existing temperature, light, percentage or collection-day entities, selected in the editor.
+- A current browser with native dialog support.
+- Any custom cards used inside a popup installed separately. Native child cards need no additional card library.
+
+## Install through HACS
+
+vanTilburg Cards is available as a **custom repository**; it is not currently included in the HACS default catalog.
+
+1. Use the **Add to HACS** button above, or open **HACS → Custom repositories**.
+2. Add `https://github.com/thomasvt1/vantilburg-cards` with type **Dashboard**.
+3. Find **vanTilburg Cards** and download the latest release.
+4. Reload your browser, then search for **vanTilburg** in **Add card** on your dashboard.
+
+[Open this repository in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=thomasvt1&repository=vantilburg-cards&category=plugin)
+
+HACS normally registers the module automatically. If your resources are managed manually, add `/hacsfiles/vantilburg-cards/vantilburg-cards.js` as a **JavaScript Module**, with a version query when updating. Avoid duplicate manual and HACS resources.
+
+## Install manually
+
+1. Download `vantilburg-cards.js` from the [latest release](https://github.com/thomasvt1/vantilburg-cards/releases/latest), or build it with `npm ci` and `npm run build`.
+2. Copy the asset to `/config/www/vantilburg-cards.js` on Home Assistant.
+3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.1.0` and resource type **JavaScript Module**.
+4. Reload the browser. In **Add card**, search for **vanTilburg**.
+
+For dashboards with YAML-managed resources:
+
+```yaml
+resources:
+  - url: /local/vantilburg-cards.js?v=0.1.0
+    type: module
+```
+
+The bundle contains Lit and the cards, popup and editors. It requires no external runtime assets. Change the URL version when replacing the asset to avoid a stale browser cache.
+
+### HACS packaging
+
+`hacs.json` declares `vantilburg-cards.js` as the release asset. Tagged releases run HACS validation and the included checks before attaching the self-contained bundle and dependency notices to the GitHub release.
+
+## Configuration
 
 The three cards appear in the card picker. Visual editors configure entities, labels, palettes, meters, navigation and appearance. Under **On tap**, enable a popup and set its title, icon and unique link. Add, remove or reorder sections and choose one or two columns. Each section embeds Home Assistant's native stack/card editor to add, edit, reorder and remove child cards. Child cards without a visual editor use HA's normal YAML fallback. Advanced `type_names` mappings remain available through YAML.
 
-## Room and popup
+| Option | Applies to | Default | Purpose |
+| --- | --- | --- | --- |
+| `type` | All | Required | One of the three custom element names above. |
+| `name` | All | Card default | Room/house label or waste countdown title override. |
+| `icon` | All | Card default | Home Assistant icon name. |
+| `palette` | All | Card default | One of the ten named light/dark palettes. |
+| `language` | All | `auto` | Follow HA, or choose `en` or `nl`. |
+| `entity` | Room, waste | Required for temperature/countdown | Temperature or days-until-collection source. |
+| `display` | Room | `auto` | `auto`, `temperature` or `lights`. |
+| `attribute` | Room | Climate current temperature or sensor state | Explicit temperature attribute. |
+| `precision` | Room | `1` | Decimal places, from 0 to 3. |
+| `lights` | Room | None | Light entity IDs to count. |
+| `meters` | House | Required | One to six percentage sensors, each with `entity`, `name` and optional `palette`. |
+| `type_entity` | Waste | None | Waste type sensor. |
+| `moved_entity` | Waste | None | Bin-out boolean entity. |
+| `type_names` | Waste | English/Dutch defaults | YAML mapping from lowercase waste states to labels. |
+| `popup` | All | None | Popup link, heading and ordered sections. |
+| `tap_action` | All | `none` | Navigation or sensor details when no popup is configured. |
+| `appearance` | All | Palette/theme defaults | Optional colors and corner radius. |
+
+See [examples/dashboard.yaml](examples/dashboard.yaml) for a complete Sections dashboard using all three cards. Examples use generic identifiers; select your own entities before adding them.
+
+### Room and popup
 
 ```yaml
 type: custom:home-room-card
@@ -82,7 +166,7 @@ lights:
   - light.landing
 ```
 
-## House summary
+### House summary
 
 ```yaml
 type: custom:home-house-card
@@ -98,7 +182,7 @@ meters:
 
 Sensors must report percentages from 0 to 100. Zero is valid; unavailable, nonnumeric and out-of-range values show an em dash and an empty unavailable track. Meter labels remain visible alongside the bars.
 
-## Waste collection
+### Waste collection
 
 ```yaml
 type: custom:home-waste-card
@@ -120,17 +204,27 @@ Optional `appearance` fields: `background`, `background_dark`, `accent`, `accent
 
 ## Development
 
+Use Node.js 24 or newer.
+
 ```sh
 npm ci
-npm run build
+npm run dev
+npm run check
 npm test
+npm run build
 npx playwright install --only-shell chromium
 npm run test:browser
-npm run dev
-npm run screenshots
+npm run update:examples
+npm run check:examples
 ```
 
-The demo uses fictional entities and values. Browser tests cover rendering, state changes, themes, navigation, progress accessibility, editor configuration preservation and popup history/focus. CI repeats the checks and uploads light/dark desktop/mobile demo captures. The build produces a single bundled module in `dist/`.
+Run `npm run update:examples` after changing a card's appearance and commit the refreshed PNGs, manifest and README gallery. It starts and stops its own local demo server and Chromium browser, uses a fixed clock, locale, timezone and viewport, and captures every registered card in light/dark themes and desktop/phone sizes. Missing card fixtures fail explicitly. No Home Assistant connection is needed. `npm run screenshots` remains an alias.
+
+CI first runs `npm run check:examples` to reject changed source, missing/altered PNGs or missing README links, then exercises the generator. The manifest records source and output SHA-256 hashes; normalized line endings make the freshness check portable between Windows and Linux. Cross-platform screenshot pixels are not compared.
+
+The demo uses synthetic fixtures. Browser tests cover rendering, state changes, themes, navigation, progress accessibility, editor configuration preservation and popup history/focus. CI runs TypeScript checking, unit tests, a production build and Chromium browser tests. See [validation notes](docs/validation.md) for checked environments and live-installation boundaries, [the configuration contract](docs/data-contract.md) for input behavior, and [the changelog](CHANGELOG.md) for releases.
+
+Keep personal Home Assistant identifiers, credentials, raw diagnostics and local installation files out of commits. `.local/` is ignored for private verification artifacts.
 
 ## Foundations
 

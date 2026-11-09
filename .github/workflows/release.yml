@@ -4,8 +4,16 @@ on:
     tags: ['v*']
 permissions:
   contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
+  hacs:
+    uses: ./.github/workflows/hacs.yml
+    permissions:
+      contents: read
   release:
+    needs: hacs
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -18,11 +26,19 @@ jobs:
         run: node --input-type=module -e 'import fs from "node:fs"; const p = JSON.parse(fs.readFileSync("package.json", "utf8")); if (process.env.GITHUB_REF_NAME !== `v${p.version}`) throw new Error("Tag must match package version");'
       - run: npm ci
       - run: npm run build
+      - run: npm run check:examples
       - run: npm test
-      - run: npx playwright install --with-deps --only-shell chromium
+      - name: Install headless Chromium
+        run: npx playwright install --only-shell chromium
+        timeout-minutes: 2
       - run: npm run test:browser
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create "$GITHUB_REF_NAME" dist/vantilburg-cards.js THIRD_PARTY_NOTICES.txt --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/vantilburg-cards.js THIRD_PARTY_NOTICES.txt --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/vantilburg-cards.js THIRD_PARTY_NOTICES.txt --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
+          fi
