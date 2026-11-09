@@ -1,0 +1,9 @@
+:root { font-family:Roboto,Arial,sans-serif; color:#17212c; background:#fafafa; --primary-background-color:#fafafa; --primary-text-color:#17212c; --secondary-text-color:#526170; --divider-color:#e9e9e9; }
+:root.dark { color-scheme:dark; color:#eef3f8; background:#12171c; --primary-background-color:#12171c; --primary-text-color:#eef3f8; --secondary-text-color:#b4c2ce; --divider-color:#29323a; }
+* { box-sizing:border-box; } body { margin:0; padding:24px; }
+body > header { max-width:1040px; margin:0 auto 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; }
+header button { background:transparent; color:inherit; padding:10px 14px; border:1px solid var(--divider-color); border-radius:10px; cursor:pointer; }
+header button:focus-visible { outline:3px solid #246b9a; }
+body > main { max-width:1040px; margin:auto; display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
+.summary { display:grid; gap:8px; } .rooms { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+@media(max-width:700px) { body { padding:16px; } body > main { grid-template-columns:1fr; gap:20px; } }
