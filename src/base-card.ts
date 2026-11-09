@@ -5,13 +5,17 @@ import { language, words } from './data';
 import type { CardConfig, HomeAssistant, Palette } from './types';
 import type { HomeOverviewPopup } from './popup';
 import './popup';
+import { previewMode, previewOwner, setPreviewMode, type PreviewMode } from './preview-state';
 
 export abstract class BaseCard extends LitElement {
-  static properties = { hass: { attribute: false }, config: { state: true } };
+  static properties = { hass: { attribute: false }, config: { state: true }, preview: { type: Boolean } };
+  preview = false;
   declare hass: HomeAssistant;
   protected config!: CardConfig;
   static styles = css`
     :host { display:block; height:100%; --hoc-radius:18px; }
+    :host([editor-preview]) { height:auto; align-self:start; }
+    :host([editor-preview]) ha-card { height:auto; }
     * { box-sizing:border-box; }
     ha-card { display:block; height:100%; border:0; border-radius:var(--hoc-radius); background:var(--hoc-bg); color:var(--primary-text-color,#17212c); box-shadow:none; overflow:hidden; }
     button,.surface { appearance:none; border:0; background:none; color:inherit; font:inherit; text-align:left; width:100%; margin:0; padding:16px; border-radius:inherit; }
@@ -38,12 +42,21 @@ export abstract class BaseCard extends LitElement {
     .track { flex:1; height:6px; border-radius:8px; background:var(--meter-track); overflow:hidden; }
     .fill { height:100%; border-radius:inherit; background:var(--meter-fill); }
     .track.unavailable { opacity:.55; }
+    .preview-switch { display:flex; gap:4px; margin-bottom:12px; padding:4px; border:1px solid var(--divider-color,#ddd); border-radius:12px; }
+    .preview-switch button { width:auto; flex:1; min-height:40px; padding:8px 12px; text-align:center; border-radius:8px; color:var(--primary-text-color,#17212c); }
+    .preview-switch button[aria-pressed="true"] { background:var(--hoc-icon-bg); color:var(--hoc-accent); font-weight:600; }
     @media (prefers-reduced-motion:no-preference) { button { transition:background 120ms ease-out; } }
   `;
   setConfig(config: CardConfig) { validateConfig(config); this.config = structuredClone(config); }
   static getConfigElement() { return document.createElement('home-overview-card-editor'); }
   getCardSize() { return 2; }
-  getGridOptions() { return { columns: this.config?.type === 'custom:home-room-card' ? 6 : 12, rows: 'auto', min_columns: 3 }; }
+  private get editorPreview() { return this.preview && !!previewOwner(this); }
+  getGridOptions() { return { columns: this.editorPreview && this.config?.popup && previewMode(this) === 'popup' ? 12 : this.config?.type === 'custom:home-room-card' ? 6 : 12, rows: 'auto', min_columns: 3 }; }
+  private changePreview(mode: PreviewMode) {
+    setPreviewMode(this, mode);
+    this.requestUpdate();
+    this.dispatchEvent(new Event('card-updated', { bubbles: true, composed: true }));
+  }
   protected get t() { return words[language(this.hass || { states: {} }, this.config?.language)]; }
   protected get dark() { return !!this.hass?.themes?.darkMode; }
   protected colors(palette: Palette) { return palettes[palette][this.dark ? 'dark' : 'light']; }
@@ -51,6 +64,7 @@ export abstract class BaseCard extends LitElement {
   protected abstract get defaultPalette(): Palette;
   protected render() {
     if (!this.config) return nothing;
+    this.toggleAttribute('editor-preview', this.editorPreview);
     const [bg, iconBg, accent] = this.colors(this.config.palette ?? this.defaultPalette);
     const appearance = this.config.appearance || {};
     const select = (light: string | undefined, dark: string | undefined, fallback: string) => (this.dark ? dark : light) || fallback;
@@ -59,7 +73,10 @@ export abstract class BaseCard extends LitElement {
     this.style.setProperty('--hoc-accent', select(appearance.accent, appearance.accent_dark, accent));
     this.style.setProperty('--hoc-radius', `${appearance.border_radius ?? 18}px`);
     this.style.colorScheme = this.dark ? 'dark' : 'light';
-    return html`<ha-card>${this.content()}</ha-card>${this.config.popup ? html`<home-overview-popup .config=${this.config.popup} .hass=${this.hass} .title=${this.config.name || (this.config.type === 'custom:home-room-card' ? this.t.room : this.config.type === 'custom:home-house-card' ? this.t.house : this.t.waste)} .icon=${this.config.icon || 'mdi:home-outline'}></home-overview-popup>` : nothing}`;
+    const showPopup = this.editorPreview && this.config.popup && previewMode(this) === 'popup';
+    return html`${this.editorPreview && this.config.popup ? html`<div class="preview-switch" role="group" aria-label="Preview"><button type="button" aria-pressed=${!showPopup} @click=${() => this.changePreview('card')}>Card</button><button type="button" aria-pressed=${!!showPopup} @click=${() => this.changePreview('popup')}>Popup</button></div>` : nothing}
+      ${showPopup ? nothing : html`<ha-card>${this.content()}</ha-card>`}
+      ${this.config.popup && (!this.preview || showPopup) ? html`<home-overview-popup .inline=${this.preview} .config=${this.config.popup} .hass=${this.hass} .title=${this.config.name || (this.config.type === 'custom:home-room-card' ? this.t.room : this.config.type === 'custom:home-house-card' ? this.t.house : this.t.waste)} .icon=${this.config.icon || 'mdi:home-outline'}></home-overview-popup>` : nothing}`;
   }
   protected shell(body: unknown, className = '') {
     const action = this.config.tap_action;
@@ -71,6 +88,7 @@ export abstract class BaseCard extends LitElement {
     return html`<div class="row"><span class="badge" aria-hidden="true"><ha-icon .icon=${icon}></ha-icon></span><div><div class="name">${name}</div><div class=${`value ${small ? 'small' : ''} ${secondary ? 'secondary' : ''}`}>${value}</div></div>${this.config.popup || this.config.tap_action && this.config.tap_action.action !== 'none' ? html`<svg class="arrow" viewBox="0 0 16 24" aria-hidden="true"><path d="m5 8 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` : nothing}</div>`;
   }
   private activate() {
+    if (this.preview) { if (this.editorPreview && this.config.popup) this.changePreview('popup'); return; }
     if (this.config.popup) { this.shadowRoot?.querySelector<HomeOverviewPopup>('home-overview-popup')?.open(); return; }
     const action = this.config.tap_action;
     if (action?.action === 'navigate') {

@@ -37,8 +37,9 @@ Synthetic readings only. Regenerate these images with `npm run update:examples`.
 | House | ![House, light](examples/house-desktop-light.png) | ![House, dark](examples/house-desktop-dark.png) |
 | Waste collection | ![Waste collection, light](examples/waste-desktop-light.png) | ![Waste collection, dark](examples/waste-desktop-dark.png) |
 | Sectioned popup | ![Popup, light](examples/popup-desktop-light.png) | ![Popup, dark](examples/popup-desktop-dark.png) |
+| Editor popup preview | ![Editor preview, light](examples/editor-desktop-light.png) | ![Editor preview, dark](examples/editor-desktop-dark.png) |
 
-Phone previews: Room ([light](examples/room-mobile-light.png), [dark](examples/room-mobile-dark.png)) · House ([light](examples/house-mobile-light.png), [dark](examples/house-mobile-dark.png)) · Waste collection ([light](examples/waste-mobile-light.png), [dark](examples/waste-mobile-dark.png)) · Popup ([light](examples/popup-mobile-light.png), [dark](examples/popup-mobile-dark.png))
+Phone previews: Room ([light](examples/room-mobile-light.png), [dark](examples/room-mobile-dark.png)) · House ([light](examples/house-mobile-light.png), [dark](examples/house-mobile-dark.png)) · Waste collection ([light](examples/waste-mobile-light.png), [dark](examples/waste-mobile-dark.png)) · Popup ([light](examples/popup-mobile-light.png), [dark](examples/popup-mobile-dark.png)) · Editor preview ([light](examples/editor-mobile-light.png), [dark](examples/editor-mobile-dark.png))
 <!-- END GENERATED EXAMPLES -->
 
 ## Requirements
@@ -65,14 +66,14 @@ HACS normally registers the module automatically. If your resources are managed 
 
 1. Download `vantilburg-cards.js` from the [latest release](https://github.com/thomasvt1/vantilburg-cards/releases/latest), or build it with `npm ci` and `npm run build`.
 2. Copy the asset to `/config/www/vantilburg-cards.js` on Home Assistant.
-3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.1.0` and resource type **JavaScript Module**.
+3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.2.0` and resource type **JavaScript Module**.
 4. Reload the browser. In **Add card**, search for **vanTilburg**.
 
 For dashboards with YAML-managed resources:
 
 ```yaml
 resources:
-  - url: /local/vantilburg-cards.js?v=0.1.0
+  - url: /local/vantilburg-cards.js?v=0.2.0
     type: module
 ```
 
@@ -85,6 +86,12 @@ The bundle contains Lit and the cards, popup and editors. It requires no externa
 ## Configuration
 
 The three cards appear in the card picker. Visual editors configure entities, labels, palettes, meters, navigation and appearance. Under **On tap**, enable a popup and set its title, icon and unique link. Add, remove or reorder sections and choose one or two columns. Each section embeds Home Assistant's native stack/card editor to add, edit, reorder and remove child cards. Child cards without a visual editor use HA's normal YAML fallback. Advanced `type_names` mappings remain available through YAML.
+
+### Preview while editing
+
+With a popup enabled, use **Card / Popup** above the card preview to switch between the summary and the complete popup. Popup renders inline so the editor stays usable. Titles, sections, columns, child cards and colors reflect the current unsaved draft; you do not need to save or exit the editor. The selected mode survives Home Assistant rebuilding the preview after edits.
+
+Preview child controls are inactive, and previewing does not navigate or change device state. Use the saved dashboard popup to operate devices. The toggle is editor-only and is never stored in dashboard YAML. On smaller screens, scroll to Home Assistant's preview area below the editor.
 
 | Option | Applies to | Default | Purpose |
 | --- | --- | --- | --- |

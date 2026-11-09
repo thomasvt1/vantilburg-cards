@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-11-09
+
+- Add an editor-only Card / Popup preview toggle that reflects unsaved changes without navigation or device-control actions.
+- Preserve the preview selection across Home Assistant draft rebuilds, with keyboard-accessible switching.
+- Keep the original card height beneath the preview toggle, including inside tall editor containers.
 
 - Align README presentation, installation instructions and configuration reference with Quatt Cards.
 - Add CI/HACS/release badges, an Add to HACS link and a library mark.

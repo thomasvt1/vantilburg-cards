@@ -30,7 +30,7 @@ export interface CommonConfig {
 }
 export interface PopupSection { title?: string; icon?: string; columns?: 1 | 2; cards: Record<string, unknown>[] }
 export interface PopupConfig { hash: string; title?: string; icon?: string; sections: PopupSection[] }
-export interface CardElement extends HTMLElement { hass: HomeAssistant; setConfig(config: Record<string, unknown>): void }
+export interface CardElement extends HTMLElement { hass: HomeAssistant; preview?: boolean; editMode?: boolean; setConfig(config: Record<string, unknown>): void }
 export interface CardHelpers { createCardElement(config: Record<string, unknown>): CardElement }
 export interface RoomConfig extends CommonConfig {
   type: 'custom:home-room-card';

@@ -15,7 +15,13 @@ The live visual editor added a section and a native child card, and saved a chan
 
 ## Repository conventions
 
-The example generator captures all three registered cards and the popup in both themes at desktop and phone widths. It writes 20 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems.
+The example generator captures all three registered cards, the popup and the editor preview in both themes at desktop and phone widths. It writes 24 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems.
+
+## Editor popup preview — 0.2.0
+
+Six added browser tests cover inline Card / Popup switching, keyboard access, unsaved config and state changes, selection persistence across Home Assistant preview rebuilds, removal of the popup, independent editor ownership, dashboard layout-edit mode isolation and unchanged card heights in a tall preview container. The suite now contains 15 unit tests and 19 browser tests. Preview children are inert and receive Home Assistant's preview/edit-mode flags; previewing does not change browser history or open a modal.
+
+A live Home Assistant House editor rendered the existing button-card, Quatt and OmniBattery children inline. An unsaved popup-title edit immediately updated the right-hand preview while Popup stayed selected. The title was restored without saving. No household dashboard configuration was changed.
 
 CI checks the committed example manifest before regenerating examples. HACS metadata validation runs separately and is required by the tagged release workflow. HACS validation does not imply inclusion in the default HACS catalog. The initial live check used an inline module resource; installation through HACS has not been verified on this repository.
 

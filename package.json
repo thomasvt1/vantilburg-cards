@@ -1,12 +1,17 @@
 {
   "name": "vantilburg-cards",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Soft, compact Home Assistant cards for rooms, household storage and waste collection",
   "type": "module",
   "license": "AGPL-3.0-or-later",
-  "repository": { "type": "git", "url": "git+https://github.com/thomasvt1/vantilburg-cards.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomasvt1/vantilburg-cards.git"
+  },
   "homepage": "https://github.com/thomasvt1/vantilburg-cards#readme",
-  "bugs": { "url": "https://github.com/thomasvt1/vantilburg-cards/issues" },
+  "bugs": {
+    "url": "https://github.com/thomasvt1/vantilburg-cards/issues"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "check": "tsc --noEmit",
@@ -17,7 +22,9 @@
     "check:examples": "node scripts/check-examples.mjs",
     "screenshots": "npm run update:examples"
   },
-  "dependencies": { "lit": "^3.3.3" },
+  "dependencies": {
+    "lit": "^3.3.3"
+  },
   "devDependencies": {
     "@mdi/js": "^7.4.47",
     "@types/node": "^24.0.0",

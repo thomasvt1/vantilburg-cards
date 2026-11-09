@@ -39,6 +39,17 @@ try {
       await page.getByRole('button', { name: 'Bedroom 18.9°' }).click();
       await page.getByRole('dialog', { name: 'Bedroom' }).waitFor();
       await capture(page, `popup-${size}-${theme}.png`, true);
+      await page.getByRole('button', { name: 'Close', exact: true }).click();
+      await page.waitForFunction(() => !location.hash);
+      await page.evaluate(() => {
+        const card = document.querySelector('home-house-card');
+        const editor = document.createElement('hui-dialog-edit-card');
+        card.replaceWith(editor); editor.append(card); card.preview = true;
+      });
+      await page.getByRole('button', { name: 'Popup', exact: true }).click();
+      await page.getByRole('heading', { name: 'Stored energy' }).waitFor();
+      await page.locator('hui-dialog-edit-card home-overview-popup home-house-card').waitFor();
+      await capture(page.locator('hui-dialog-edit-card'), `editor-${size}-${theme}.png`);
       if (errors.length) throw new Error(errors.join('\n'));
       await page.close();
     }
@@ -52,8 +63,9 @@ try {
     'Synthetic readings only. Regenerate these images with `npm run update:examples`.', '',
     '| Card | Light theme | Dark theme |', '| --- | --- | --- |',
     ...cards.map(card => `| ${card.name} | ![${card.name}, light](examples/${card.slug}-desktop-light.png) | ![${card.name}, dark](examples/${card.slug}-desktop-dark.png) |`),
-    '| Sectioned popup | ![Popup, light](examples/popup-desktop-light.png) | ![Popup, dark](examples/popup-desktop-dark.png) |', '',
-    'Phone previews: ' + [...cards, { slug: 'popup', name: 'Popup' }].map(card => `${card.name} ([light](examples/${card.slug}-mobile-light.png), [dark](examples/${card.slug}-mobile-dark.png))`).join(' · '),
+    '| Sectioned popup | ![Popup, light](examples/popup-desktop-light.png) | ![Popup, dark](examples/popup-desktop-dark.png) |',
+    '| Editor popup preview | ![Editor preview, light](examples/editor-desktop-light.png) | ![Editor preview, dark](examples/editor-desktop-dark.png) |', '',
+    'Phone previews: ' + [...cards, { slug: 'popup', name: 'Popup' }, { slug: 'editor', name: 'Editor preview' }].map(card => `${card.name} ([light](examples/${card.slug}-mobile-light.png), [dark](examples/${card.slug}-mobile-dark.png))`).join(' · '),
     '<!-- END GENERATED EXAMPLES -->',
   ].join('\n');
   const readmePath = resolve(root, 'README.md');

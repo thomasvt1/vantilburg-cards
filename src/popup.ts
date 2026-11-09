@@ -6,7 +6,8 @@ declare global { interface Window { loadCardHelpers?: () => Promise<CardHelpers>
 
 /** Composes existing Lovelace cards; it never owns their device-control logic. */
 export class HomeOverviewPopup extends LitElement {
-  static properties = { config: { attribute: false }, hass: { attribute: false }, title: { type: String }, icon: { type: String }, error: { state: true }, childrenReady: { state: true } };
+  static properties = { config: { attribute: false }, hass: { attribute: false }, title: { type: String }, icon: { type: String }, inline: { type: Boolean, reflect: true }, error: { state: true }, childrenReady: { state: true } };
+  inline = false;
   declare config: PopupConfig;
   declare hass: HomeAssistant;
   title = '';
@@ -24,6 +25,10 @@ export class HomeOverviewPopup extends LitElement {
     * { box-sizing:border-box; }
     dialog { border:0; border-radius:28px; padding:0; width:min(560px,calc(100vw - 24px)); max-height:calc(100dvh - 64px); margin:32px auto; background:var(--primary-background-color,#fafafa); color:var(--primary-text-color,#17212c); box-shadow:0 16px 48px #0003; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--hoc-icon-bg) transparent; }
     dialog::backdrop { background:#0005; }
+    :host([inline]) { display:block; min-width:0; }
+    .inline-preview { border-radius:28px; background:var(--primary-background-color,#fafafa); color:var(--primary-text-color,#17212c); overflow:hidden; width:100%; }
+    .inline-preview header { position:static; }
+    .close-placeholder { width:44px; height:44px; display:grid; place-items:center; flex:none; }
     header { display:flex; align-items:center; gap:12px; padding:24px 24px 16px; position:sticky; top:0; z-index:1; background:var(--primary-background-color,#fafafa); }
     .badge { display:grid; place-items:center; border-radius:50%; width:42px; height:42px; background:var(--hoc-icon-bg); color:var(--hoc-accent); flex:none; }
     h2 { font:600 15px/1.35 var(--paper-font-body1_-_font-family,Roboto,system-ui,sans-serif); margin:0; flex:1; overflow-wrap:anywhere; }
@@ -56,10 +61,15 @@ export class HomeOverviewPopup extends LitElement {
   }
   protected updated(changed: PropertyValues) {
     if (changed.has('hass')) for (const section of this.cards) for (const card of section) card.hass = this.hass;
+    if (this.inline) {
+      this.shadowRoot?.querySelector('dialog')?.close();
+      if (this.cardConfig !== this.config && this.config) void this.loadCards();
+      return;
+    }
     this.syncDialog();
   }
   open() {
-    if (!this.config) return;
+    if (!this.config || this.inline) return;
     this.opener = this.getRootNode() instanceof ShadowRoot ? (this.getRootNode() as ShadowRoot).activeElement as HTMLElement : document.activeElement as HTMLElement;
     if (location.hash !== this.config.hash) {
       history.pushState({ ...history.state, homeOverviewPopup: this.config.hash }, '', this.config.hash);
@@ -81,7 +91,7 @@ export class HomeOverviewPopup extends LitElement {
     this.opener?.focus();
   }
   private syncDialog() {
-    if (!this.isConnected || !this.config) return;
+    if (!this.isConnected || !this.config || this.inline) return;
     const dialog = this.shadowRoot?.querySelector('dialog');
     if (!dialog) return;
     const shouldOpen = location.hash === this.config.hash;
@@ -103,6 +113,7 @@ export class HomeOverviewPopup extends LitElement {
       if (generation !== this.generation || !this.isConnected) return;
       this.cards = this.config.sections.map(section => section.cards.map(config => {
         const card = helpers.createCardElement(prepareChildCard(config));
+        if (this.inline) { card.preview = true; card.editMode = true; }
         card.hass = this.hass;
         return card;
       }));
@@ -111,9 +122,14 @@ export class HomeOverviewPopup extends LitElement {
   }
   protected render() {
     if (!this.config) return nothing;
+    if (this.inline) return html`<div class="inline-preview" role="region" aria-label=${`${this.config.title || this.title} popup preview`}>${this.renderContent()}</div>`;
     return html`<dialog aria-labelledby="popup-title" @cancel=${(e: Event) => { e.preventDefault(); this.close(); }} @click=${(e: MouseEvent) => {
       if (e.target === e.currentTarget) { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) this.close(); }
-    }}><header><span class="badge" aria-hidden="true"><ha-icon .icon=${this.config.icon || this.icon}></ha-icon></span><h2 id="popup-title">${this.config.title || this.title}</h2><button aria-label=${this.hass?.language?.startsWith('nl') ? 'Sluiten' : 'Close'} @click=${this.close}><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></header><main>${this.error ? html`<p class="error" role="alert">${this.error}</p>` : !this.childrenReady ? html`<p role="status">Loading…</p>` : this.config.sections.map((section, i) => html`<section>${section.title ? html`<div class="heading">${section.icon ? html`<ha-icon .icon=${section.icon} aria-hidden="true"></ha-icon>` : nothing}<h3>${section.title}</h3><span class="line" aria-hidden="true"></span></div>` : nothing}<div class="cards" style=${`--columns:${section.columns || 1}`}>${this.cards[i]?.map(card => html`<div class="child">${card}</div>`)}</div></section>`)}</main></dialog>`;
+    }}>${this.renderContent()}</dialog>`;
+  }
+  private renderContent() {
+    const closeIcon = html`<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+    return html`<header><span class="badge" aria-hidden="true"><ha-icon .icon=${this.config.icon || this.icon}></ha-icon></span><h2 id="popup-title">${this.config.title || this.title}</h2>${this.inline ? html`<span class="close-placeholder" aria-hidden="true">${closeIcon}</span>` : html`<button aria-label=${this.hass?.language?.startsWith('nl') ? 'Sluiten' : 'Close'} @click=${this.close}>${closeIcon}</button>`}</header><main>${this.error ? html`<p class="error" role="alert">${this.error}</p>` : !this.childrenReady ? html`<p role="status">Loading…</p>` : this.config.sections.map((section, i) => html`<section>${section.title ? html`<div class="heading">${section.icon ? html`<ha-icon .icon=${section.icon} aria-hidden="true"></ha-icon>` : nothing}<h3>${section.title}</h3><span class="line" aria-hidden="true"></span></div>` : nothing}<div class="cards" ?inert=${this.inline} style=${`--columns:${section.columns || 1}`}>${this.cards[i]?.map(card => html`<div class="child">${card}</div>`)}</div></section>`)}</main>`;
   }
 }
 if (!customElements.get('home-overview-popup')) customElements.define('home-overview-popup', HomeOverviewPopup);
