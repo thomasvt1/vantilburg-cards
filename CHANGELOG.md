@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-11-09
+
+- Replace the custom dialog with Bubble Card's native standalone popup, preserving its scrolling, positioning, animations, gestures and close behavior.
+- Require Bubble Card 3.4.3 or newer for popups and show a clear installation message when missing.
+- Keep the existing section editor, palette styling and noninteractive unsaved preview.
+- Test runtime behavior and generate popup examples using the real pinned Bubble Card release.
+
 ## 0.2.1 — 2026-11-09
 
 - Remove the unavailable-light count from room summaries, keeping the lights-on count compact.

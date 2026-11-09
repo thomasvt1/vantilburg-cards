@@ -27,6 +27,14 @@ CI checks the committed example manifest before regenerating examples. HACS meta
 
 Unlike Quatt Cards, this package does not yet enforce Quatt's 81% per-card coverage gate. Passing test counts are not a coverage claim.
 
+## Bubble popup runtime — 0.3.0
+
+The production adapter instantiates the installed `custom:bubble-card` with standalone `cards` configuration. The modal implementation is no longer part of this library. The original section configuration remains unchanged; the adapter emits native Bubble separators and Lovelace grids. The Card / Popup editor preview is still an inert inline content preview, not a simulation of Bubble gestures or animation.
+
+The browser integration suite loads the real official Bubble Card v3.4.3 bundle, pinned by SHA-256. It checks opening, Escape, Back/Forward and hash navigation, child state updates, removal on disconnect, and propagation of child more-info events through a Home Assistant shadow-root fixture. A separate test checks the missing-dependency message. There are 17 unit tests and 21 browser tests. The fixture is downloaded for development/tests only and is excluded from the distributed bundle; generated popup screenshots also use that real runtime.
+
+The household preview was checked with the same installed Bubble Card v3.4.3: desktop and 390px layouts, scrolling to the climate controls, close button, Escape, and opening the native Home Assistant climate details panel from a Quatt child card. No device-control commands were sent. The main dashboard remained on its restored original configuration. Physical touch swipes and separate Firefox/Safari runs have not been verified.
+
 ## Compatibility boundaries
 
 - Popup editing embeds Home Assistant's native stack/card editor. A child without a visual editor uses Home Assistant's YAML fallback.

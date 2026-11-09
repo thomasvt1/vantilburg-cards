@@ -4,7 +4,7 @@
 
 # vanTilburg Cards
 
-Compact Home Assistant cards for room temperatures, lights, household storage and waste collection. Shared pastel palettes preserve a calm overview in light and dark themes. Each card can open a built-in popup made of reusable **sections + cards**.
+Compact Home Assistant cards for room temperatures, lights, household storage and waste collection. Shared pastel palettes preserve a calm overview in light and dark themes. Each card can open a Bubble Card popup made of reusable **sections + cards**.
 
 [![CI](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/ci.yml) [![HACS](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/hacs.yml/badge.svg)](https://github.com/thomasvt1/vantilburg-cards/actions/workflows/hacs.yml) [![Release](https://img.shields.io/github/v/release/thomasvt1/vantilburg-cards)](https://github.com/thomasvt1/vantilburg-cards/releases/latest)
 
@@ -20,7 +20,7 @@ Compact Home Assistant cards for room temperatures, lights, household storage an
 
 No backend integration is required. These cards read existing entity states. A popup's child cards retain their own actions and dependencies.
 
-All three cards have a visual configuration editor, card-picker preview, YAML configuration, and Sections/Masonry sizing. Every card can open a built-in popup with repeated **section + content** groups. The visual editor configures both the popup and its child cards.
+All three cards have a visual configuration editor, card-picker preview, YAML configuration, and Sections/Masonry sizing. Every card can open a Bubble Card popup with repeated **section + content** groups. The visual editor configures both the popup and its child cards.
 
 <!-- BEGIN GENERATED EXAMPLES -->
 ![All three vanTilburg cards, desktop light theme with synthetic data](examples/desktop-light.png)
@@ -46,7 +46,7 @@ Phone previews: Room ([light](examples/room-mobile-light.png), [dark](examples/r
 
 - Home Assistant 2026.10 or newer, matching the package's declared HACS minimum.
 - Existing temperature, light, percentage or collection-day entities, selected in the editor.
-- A current browser with native dialog support.
+- [Bubble Card 3.4.3 or newer](https://github.com/Clooos/Bubble-Card) installed through HACS and loaded as a dashboard resource when using popups. Summary cards work without it.
 - Any custom cards used inside a popup installed separately. Native child cards need no additional card library.
 
 ## Install through HACS
@@ -77,7 +77,7 @@ resources:
     type: module
 ```
 
-The bundle contains Lit and the cards, popup and editors. It requires no external runtime assets. Change the URL version when replacing the asset to avoid a stale browser cache.
+The bundle contains Lit, the summary cards, the Bubble popup adapter and the editors. Bubble Card is installed separately; it is not bundled or downloaded by this library. Change the URL version when replacing the asset to avoid a stale browser cache.
 
 ### HACS packaging
 
@@ -144,11 +144,13 @@ popup:
           layout: slim
 ```
 
-The popup inherits the card's palette. Its optional `title` and `icon` override the header. Each section takes an optional `title`, `icon`, `columns` (1 or 2), and a `cards` list using ordinary Lovelace configuration. Quatt, OmniBattery, Bubble and other custom child cards must be installed separately. Native cards also work. A popup with native children needs no Bubble Card dependency.
+The popup inherits the card's palette. Its optional `title` and `icon` override the header. Each section takes an optional `title`, `icon`, `columns` (1 or 2), and a `cards` list using ordinary Lovelace configuration. Sections become native Bubble separators and ordinary Lovelace cards or grids. Every popup requires Bubble Card, including popups with only native children. Quatt, OmniBattery and other custom child cards must also be installed separately.
 
 Bubble children without an explicit `styles` field receive a shared palette and on/off styling preset, including children inside grids/stacks. This removes repeated per-room CSS. A child's explicit `styles` bypasses the preset. The adapter uses Bubble's styling hooks and should be rechecked when updating Bubble Card.
 
-Use a **unique hash per popup within a view**. Opening it adds a browser-history entry; Back, Escape, the close button and clicking outside dismiss it. Forward or a direct hash link opens it again. Child cards are created lazily through Home Assistant's `loadCardHelpers()` and receive state updates. Nested popup definitions are not supported.
+Use a **unique hash per popup within a view**. The library opens the hash using Home Assistant navigation; Bubble Card owns the popup container, animation, scrolling, backdrop, swipe-to-close, Escape, close button and history handling. The adapter uses Bubble's public standalone `cards` configuration, with a 560px desktop width and the original 64px desktop / 56px mobile top offsets. It does not copy or patch Bubble's popup implementation. Nested popup definitions are not supported.
+
+The editor's inline preview remains a noninteractive content preview so you can edit unsaved drafts without opening a live popup. Test animations and gestures on the saved dashboard. If Bubble is missing, tapping a summary shows an installation message rather than opening a different popup implementation.
 
 An embedded popup replaces `tap_action`. To retain an existing external popup instead, omit `popup` and configure:
 

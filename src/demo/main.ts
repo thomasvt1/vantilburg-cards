@@ -3,11 +3,13 @@ import { mdiSofa, mdiCountertopOutline, mdiBedKingOutline, mdiDesk, mdiBabyCarri
 import '../index';
 import type { CardConfig, CardElement, HomeAssistant } from '../types';
 import './style.css';
+import { loadBubbleFixture } from './bubble-runtime';
+
 
 const icons: Record<string, string> = { 'mdi:sofa': mdiSofa, 'mdi:countertop-outline': mdiCountertopOutline, 'mdi:bed-king-outline': mdiBedKingOutline, 'mdi:desk': mdiDesk, 'mdi:baby-carriage': mdiBabyCarriage, 'mdi:home-roof': mdiHomeRoof, 'mdi:stairs': mdiStairs, 'mdi:flower-outline': mdiFlowerOutline, 'mdi:home-outline': mdiHomeOutline, 'mdi:trash-can-outline': mdiTrashCanOutline, 'mdi:thermometer': mdiThermometer, 'mdi:lightbulb-outline': mdiLightbulbOutline };
 class DemoIcon extends LitElement {
   static properties = { icon: { type: String } }; icon = '';
-  static styles = css`:host{display:inline-flex;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;fill:currentColor}`;
+  static styles = css`:host{display:inline-flex;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);fill:currentColor;flex:none}`;
   render() { return html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d=${icons[this.icon] || mdiHomeOutline}></path></svg>`; }
 }
 customElements.define('ha-icon', DemoIcon);
@@ -34,6 +36,7 @@ const configs: CardConfig[] = [
 ];
 function create(config: Record<string, unknown>) { const card = document.createElement(String(config.type).replace('custom:', '')) as CardElement; card.setConfig(config); card.hass = hass; return card; }
 window.loadCardHelpers = async () => ({ createCardElement: create });
+await loadBubbleFixture();
 const header = document.createElement('header');
 header.innerHTML = '<span>vanTilburg Cards · Demo data</span><button type="button">Toggle dark mode</button>';
 document.body.append(header);

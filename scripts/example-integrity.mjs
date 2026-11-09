@@ -11,7 +11,7 @@ export async function exampleInputDigest() {
     const files = await Promise.all(entries.map(entry => entry.isDirectory() ? walk(`${directory}/${entry.name}`) : `${directory}/${entry.name}`));
     return files.flat();
   }
-  const paths = [...await walk('src'), 'index.html', 'vite.config.ts', 'package.json', 'package-lock.json', 'scripts/update-examples.mjs', 'scripts/check-examples.mjs', 'scripts/example-integrity.mjs'].sort();
+  const paths = [...await walk('src'), 'index.html', 'vite.config.ts', 'package.json', 'package-lock.json', 'scripts/fetch-bubble.mjs', 'scripts/update-examples.mjs', 'scripts/check-examples.mjs', 'scripts/example-integrity.mjs'].sort();
   const hash = createHash('sha256');
   for (const path of paths) {
     const bytes = await readFile(resolve(root, path));

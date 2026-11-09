@@ -1,6 +1,6 @@
 {
   "name": "vantilburg-cards",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Soft, compact Home Assistant cards for rooms, household storage and waste collection",
   "type": "module",
   "license": "AGPL-3.0-or-later",
@@ -13,6 +13,10 @@
     "url": "https://github.com/thomasvt1/vantilburg-cards/issues"
   },
   "scripts": {
+    "fetch:bubble": "node scripts/fetch-bubble.mjs",
+    "predev": "npm run fetch:bubble",
+    "pretest:browser": "npm run fetch:bubble",
+    "preupdate:examples": "npm run fetch:bubble",
     "dev": "vite --host 127.0.0.1",
     "check": "tsc --noEmit",
     "build": "tsc --noEmit && vite build",

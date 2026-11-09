@@ -1,6 +1,7 @@
 import { LitElement, css, html, nothing, type PropertyValues } from 'lit';
 import type { CardElement, CardHelpers, HomeAssistant, PopupConfig } from './types';
 import { prepareChildCard } from './child-cards';
+import { bubblePopupConfig } from './bubble-popup';
 
 declare global { interface Window { loadCardHelpers?: () => Promise<CardHelpers> } }
 
@@ -16,15 +17,15 @@ export class HomeOverviewPopup extends LitElement {
   private childrenReady = false;
   private cards: CardElement[][] = [];
   private generation = 0;
-  private opener?: HTMLElement;
-  private pushed = false;
+  private bubble?: CardElement;
+  private portal?: HTMLElement;
+  private bubbleSignature = '';
+  private loading?: Promise<void>;
+  private attemptedOpen = false;
   private cardConfig?: PopupConfig;
-  private readonly syncLocation = () => this.syncDialog();
   static styles = css`
     :host { display:contents; }
     * { box-sizing:border-box; }
-    dialog { border:0; border-radius:28px; padding:0; width:min(560px,calc(100vw - 24px)); max-height:calc(100dvh - 64px); margin:32px auto; background:var(--primary-background-color,#fafafa); color:var(--primary-text-color,#17212c); box-shadow:0 16px 48px #0003; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--hoc-icon-bg) transparent; }
-    dialog::backdrop { background:#0005; }
     :host([inline]) { display:block; min-width:0; }
     .inline-preview { border-radius:28px; background:var(--primary-background-color,#fafafa); color:var(--primary-text-color,#17212c); overflow:hidden; width:100%; }
     .inline-preview header { position:static; }
@@ -46,61 +47,83 @@ export class HomeOverviewPopup extends LitElement {
     .child { min-width:0; --primary-color:var(--hoc-accent); --ha-card-background:var(--hoc-bg); --card-background-color:var(--hoc-bg); --ha-card-border-width:0; --ha-card-border-radius:18px; --bubble-main-background-color:var(--hoc-bg); --bubble-secondary-background-color:var(--hoc-icon-bg); --bubble-icon-background-color:var(--hoc-icon-bg); --bubble-accent-color:var(--hoc-accent); --bubble-sub-button-background-color:var(--hoc-icon-bg); }
     .error { padding:16px; }
     ::selection { background:var(--hoc-icon-bg); }
-    @media(max-width:600px) { dialog { margin:16px auto; max-height:calc(100dvh - 32px); } header { padding:16px 18px; } }
+    @media(max-width:600px) { header { padding:16px 18px; } }
   `;
   connectedCallback() {
     super.connectedCallback();
-    for (const event of ['location-changed', 'popstate', 'hashchange']) window.addEventListener(event, this.syncLocation);
-    void this.updateComplete.then(() => this.syncDialog());
+    void customElements.whenDefined('bubble-card').then(() => { if (this.isConnected && !this.inline) void this.ensureBubble(); });
+    void this.updateComplete.then(() => { if (this.isConnected && !this.inline) void this.ensureBubble(); });
   }
   disconnectedCallback() {
     super.disconnectedCallback(); this.generation++;
     if (!this.childrenReady) this.cardConfig = undefined;
-    for (const event of ['location-changed', 'popstate', 'hashchange']) window.removeEventListener(event, this.syncLocation);
-    this.shadowRoot?.querySelector('dialog')?.close();
+    this.removeBubble();
   }
   protected updated(changed: PropertyValues) {
     if (changed.has('hass')) for (const section of this.cards) for (const card of section) card.hass = this.hass;
     if (this.inline) {
-      this.shadowRoot?.querySelector('dialog')?.close();
+      this.removeBubble();
       if (this.cardConfig !== this.config && this.config) void this.loadCards();
       return;
     }
-    this.syncDialog();
+    void this.ensureBubble();
   }
-  open() {
+  async open() {
     if (!this.config || this.inline) return;
-    this.opener = this.getRootNode() instanceof ShadowRoot ? (this.getRootNode() as ShadowRoot).activeElement as HTMLElement : document.activeElement as HTMLElement;
+    this.attemptedOpen = true;
+    await this.ensureBubble();
+    if (!this.bubble || !this.isConnected || this.inline) { this.requestUpdate(); return; }
     if (location.hash !== this.config.hash) {
-      history.pushState({ ...history.state, homeOverviewPopup: this.config.hash }, '', this.config.hash);
-      this.pushed = true;
+      history.pushState(null, '', this.config.hash);
       window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
     }
-    this.syncDialog();
   }
-  private close() {
-    this.shadowRoot?.querySelector('dialog')?.close();
-    if (location.hash === this.config?.hash) {
-      if (this.pushed && history.state?.homeOverviewPopup === this.config.hash) history.back();
-      else {
-        history.replaceState(history.state, '', location.pathname + location.search);
-        window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: true } }));
-      }
+  private removeBubble() {
+    this.portal?.remove(); this.portal = undefined; this.bubble = undefined; this.bubbleSignature = '';
+  }
+  private async ensureBubble() {
+    if (!this.isConnected || !this.config || this.inline || !this.hass) return;
+    if (!customElements.get('bubble-card')) {
+      this.error = 'Install Bubble Card 3.4.3 or newer through HACS, then reload the dashboard to use popups.';
+      return;
     }
-    this.pushed = false;
-    this.opener?.focus();
+    if (this.loading) { await this.loading; if (!this.bubble) return; }
+    if (!this.bubble) {
+      const generation = this.generation;
+      this.loading = (async () => {
+        try {
+          if (!window.loadCardHelpers) throw new Error('Home Assistant card helpers are not available. Reload the dashboard.');
+          const helpers = await window.loadCardHelpers();
+          if (generation !== this.generation || !this.isConnected || this.inline) return;
+          // Bubble suspends the nearest HA layout cell when closed. A separate
+          // portal gives it its own host, so it never hides the summary card.
+          this.portal = document.createElement('div');
+          this.portal.dataset.vantilburgPopup = this.config.hash;
+          this.portal.style.display = 'contents';
+          const config = this.runtimeConfig();
+          this.bubble = helpers.createCardElement(config);
+          this.bubbleSignature = JSON.stringify(config);
+          this.bubble.hass = this.hass;
+          this.portal.append(this.bubble);
+          // Keep composed child events (e.g. hass-more-info) inside HA's app.
+          (document.querySelector('home-assistant')?.shadowRoot ?? document.body).append(this.portal);
+          this.error = '';
+        } catch (error) { this.error = error instanceof Error ? error.message : 'Could not load Bubble Card.'; this.removeBubble(); }
+      })();
+      try { await this.loading; } finally { this.loading = undefined; }
+    }
+    if (this.bubble) {
+      const config = this.runtimeConfig(), signature = JSON.stringify(config);
+      if (signature !== this.bubbleSignature) { this.bubble.setConfig(config); this.bubbleSignature = signature; }
+      this.bubble.hass = this.hass;
+    }
   }
-  private syncDialog() {
-    if (!this.isConnected || !this.config || this.inline) return;
-    const dialog = this.shadowRoot?.querySelector('dialog');
-    if (!dialog) return;
-    const shouldOpen = location.hash === this.config.hash;
-    if (shouldOpen && !dialog.open) {
-      // Save focus even for hash navigation initiated outside this card.
-      if (!this.opener) this.opener = document.activeElement as HTMLElement;
-      dialog.showModal();
-    } else if (!shouldOpen && dialog.open) { dialog.close(); this.opener?.focus(); }
-    if (shouldOpen && this.cardConfig !== this.config) void this.loadCards();
+  private runtimeConfig() {
+    const style = getComputedStyle(this);
+    // Resolve inherited variables before leaving the card's shadow tree.
+    const names = ['--hoc-bg', '--hoc-icon-bg', '--hoc-accent', '--primary-background-color', '--primary-text-color', '--secondary-text-color', '--divider-color', '--paper-font-body1_-_font-family'];
+    const theme = `:host { ${names.map(name => `${name}:${style.getPropertyValue(name)};`).join('')} color-scheme:${this.hass.themes?.darkMode ? 'dark' : 'light'}; }`;
+    return bubblePopupConfig(this.config, this.title, this.icon, theme);
   }
   private async loadCards() {
     const generation = ++this.generation;
@@ -123,13 +146,11 @@ export class HomeOverviewPopup extends LitElement {
   protected render() {
     if (!this.config) return nothing;
     if (this.inline) return html`<div class="inline-preview" role="region" aria-label=${`${this.config.title || this.title} popup preview`}>${this.renderContent()}</div>`;
-    return html`<dialog aria-labelledby="popup-title" @cancel=${(e: Event) => { e.preventDefault(); this.close(); }} @click=${(e: MouseEvent) => {
-      if (e.target === e.currentTarget) { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) this.close(); }
-    }}>${this.renderContent()}</dialog>`;
+    return this.attemptedOpen && this.error ? html`<p class="error" role="alert">${this.error}</p>` : nothing;
   }
   private renderContent() {
     const closeIcon = html`<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
-    return html`<header><span class="badge" aria-hidden="true"><ha-icon .icon=${this.config.icon || this.icon}></ha-icon></span><h2 id="popup-title">${this.config.title || this.title}</h2>${this.inline ? html`<span class="close-placeholder" aria-hidden="true">${closeIcon}</span>` : html`<button aria-label=${this.hass?.language?.startsWith('nl') ? 'Sluiten' : 'Close'} @click=${this.close}>${closeIcon}</button>`}</header><main>${this.error ? html`<p class="error" role="alert">${this.error}</p>` : !this.childrenReady ? html`<p role="status">Loading…</p>` : this.config.sections.map((section, i) => html`<section>${section.title ? html`<div class="heading">${section.icon ? html`<ha-icon .icon=${section.icon} aria-hidden="true"></ha-icon>` : nothing}<h3>${section.title}</h3><span class="line" aria-hidden="true"></span></div>` : nothing}<div class="cards" ?inert=${this.inline} style=${`--columns:${section.columns || 1}`}>${this.cards[i]?.map(card => html`<div class="child">${card}</div>`)}</div></section>`)}</main>`;
+    return html`<header><span class="badge" aria-hidden="true"><ha-icon .icon=${this.config.icon || this.icon}></ha-icon></span><h2 id="popup-title">${this.config.title || this.title}</h2><span class="close-placeholder" aria-hidden="true">${closeIcon}</span></header><main>${this.error ? html`<p class="error" role="alert">${this.error}</p>` : !this.childrenReady ? html`<p role="status">Loading…</p>` : this.config.sections.map((section, i) => html`<section>${section.title ? html`<div class="heading">${section.icon ? html`<ha-icon .icon=${section.icon} aria-hidden="true"></ha-icon>` : nothing}<h3>${section.title}</h3><span class="line" aria-hidden="true"></span></div>` : nothing}<div class="cards" inert style=${`--columns:${section.columns || 1}`}>${this.cards[i]?.map(card => html`<div class="child">${card}</div>`)}</div></section>`)}</main>`;
   }
 }
 if (!customElements.get('home-overview-popup')) customElements.define('home-overview-popup', HomeOverviewPopup);

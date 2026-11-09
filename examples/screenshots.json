@@ -1,5 +1,5 @@
 {
-  "inputDigest": "40522649d5f2e5dcd8bc64bd37cf1bc541a7bceeaf901b10657d3025a95539ba",
+  "inputDigest": "5c6a48e26f97cd3be6b0c19b1d91887d45bd333bdf463cccebbf10e9b62d011b",
   "files": [
     "desktop-dark.png",
     "desktop-light.png",
@@ -31,25 +31,25 @@
     "room-desktop-light.png": "2f164fa6eccae593361942eed406adf4a964886379b83a7109524d1790b48d7f",
     "house-desktop-light.png": "69247e067aff1e7d4a96a3f69da3df745afd501baab3cd0698cb53529b3215e8",
     "waste-desktop-light.png": "268e040786213da6494e2ceb4256b706f453524c509581c8f72e4fb359ec3f9e",
-    "popup-desktop-light.png": "97c920fed1de0a19f5362517f9ceccbfb5464d883c75bbbc769976f9db100b78",
-    "editor-desktop-light.png": "900e050bd5171358379881cb733ddeff0ea63d998514284dcd9e0128aa05e2ef",
+    "popup-desktop-light.png": "d57c261c920b3dd6ae676f2c6270f468da9eb29769b8c7cf59eb9b83732e4892",
+    "editor-desktop-light.png": "94060437fbf13af6d417fec2ac8c1b087dad45016304a700851cc478bcdca05c",
     "desktop-dark.png": "2b51d6c8aa97ab886a8cf6371b9dc5646583ef0b0bdae935cb7f347ada704d78",
     "room-desktop-dark.png": "1d3563a5c6970f3bef10c771dcc3c5868fcd02afb9adae096d82f9d9afc5b35c",
     "house-desktop-dark.png": "82a8226b68f5611fb8eb956eb50516bec75c2189b21b7ec5cd1339d53d91cc69",
     "waste-desktop-dark.png": "ed6215b7f123c1828ca64e6ec94fbe200605d93a10418fb042dafed3641b963a",
-    "popup-desktop-dark.png": "8b002d7346d6daf6ac4469d528e101e36f555f1ca90706825499e7645dafcd79",
-    "editor-desktop-dark.png": "bdba5a6ebd6cac1d3aa6cb9c172949548bebe7604d95a2e1311a51cba0a02679",
+    "popup-desktop-dark.png": "afc255237cb196683fb1de6747205825abc512f022c0f718fd8cf045e1038eda",
+    "editor-desktop-dark.png": "5e0e00f2a38d95232146767dd8ff20af4b521ab2b4e961a96b32675d1d5c1e56",
     "mobile-light.png": "5062e7a771260683c44e08755593da9a8e7532c8803bbb457b4015f80ffced43",
     "room-mobile-light.png": "1d5d59c2aa1b744e09d67696b0d55c4949cd786d54009578f9fd36bc24ebda84",
     "house-mobile-light.png": "605760a4ea1b4c838183f45da71e95d0bd9e08c73ebdbff23a3a2f21a6a1b4e5",
     "waste-mobile-light.png": "5cd987116a3f92ce442e23b9ebb7754d61f19abf8d5d906cc58bd1fb8d43be71",
-    "popup-mobile-light.png": "8cd1ce51a0524eb5176b2af0d7907f0e698df61403887403b8332d1675bf0400",
+    "popup-mobile-light.png": "8136310ff83e99f5714f32b086a0fa6886bfe04ba1efb9ebf1364f4b61fff487",
     "editor-mobile-light.png": "f30d1265be0471be66bdc42d8328204e17fde6e5f9aec8d29815babf1dd9fc29",
     "mobile-dark.png": "d8f4caf3a6ca6387f4e8c3b41ba61375dc5ba12e6c8feeac7b7841d7b818bbfb",
     "room-mobile-dark.png": "6cc3360fafcd91af29b916b959c166a6c8dd4571fba83869cc2281e6da9c3ed9",
     "house-mobile-dark.png": "b134ed5d50a4b7b3ba35451bd536818349f636b988580736a3e6d0e8079a33de",
     "waste-mobile-dark.png": "2bf9a12ef276e99c3c9fc38e563c4f3f9c92e8177b0633eef8e7520c923161c8",
-    "popup-mobile-dark.png": "0cfbf9fb46436909047cd48ff90ef2e0605744fa128f3fb68bdca7464e38a4c3",
+    "popup-mobile-dark.png": "b979c24650300ebb3f64fc682aaf11fa27df7a50ee8682e726eb1701f7a36f50",
     "editor-mobile-dark.png": "4f2f6a20db689772067e2a9d644cb9ee1d5ff42e86f3efcd096ac8381bab95e1"
   }
 }

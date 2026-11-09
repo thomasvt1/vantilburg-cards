@@ -11,7 +11,7 @@ vanTilburg Cards consumes explicitly configured Home Assistant entities. It does
 
 Language follows Home Assistant for English and Dutch; other languages fall back to English. Labels may be overridden per card. Waste type names can be overridden by a YAML mapping.
 
-Popups have a unique `#hash` within a view and an ordered list of sections. Each section contains ordinary Lovelace child-card configurations and one or two columns. Children are constructed lazily using Home Assistant card helpers and receive the current `hass` object on state updates. The library owns the modal, headings, layout, history and shared palette; child cards own device-control behavior.
+Popups have a unique `#hash` within a view and an ordered list of sections. Each section contains ordinary Lovelace child-card configurations and one or two columns. The library compiles sections to Bubble separators and Lovelace cards/grids, passes state updates, and provides the shared palette. Bubble Card 3.4.3+ owns the actual popup, child-card lifecycle, scrolling, gestures, backdrop and closing/history behavior. Child cards own device-control behavior. The runtime host is isolated from the summary card's layout cell but remains inside Home Assistant's app so child more-info events reach HA. Disconnecting the card removes its runtime host.
 
 Popup configuration is edited through the native Home Assistant card editor inside each section. Nested configuration-change events are captured without replacing the parent card configuration. Unknown child-card options are preserved. Nested popups are unsupported.
 

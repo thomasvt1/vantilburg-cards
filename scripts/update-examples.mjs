@@ -24,7 +24,7 @@ try {
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(`${server.resolvedUrls.local[0]}?theme=${theme}`);
       await page.getByRole('button', { name: 'Living Room 20.0°' }).waitFor();
-      const registered = await page.evaluate(() => window.customCards.map(card => card.type).sort());
+      const registered = await page.evaluate(() => window.customCards.filter(card => card.type !== 'bubble-card').map(card => card.type).sort());
       if (JSON.stringify(registered) !== JSON.stringify(cards.map(card => card.type).sort())) throw new Error('Every registered card needs an example fixture');
       await page.evaluate(async () => {
         await document.fonts.ready;
@@ -37,9 +37,9 @@ try {
       await capture(page, `${size}-${theme}.png`, true);
       for (const card of cards) await capture(page.locator(card.type).first(), `${card.slug}-${size}-${theme}.png`);
       await page.getByRole('button', { name: 'Bedroom 18.9°' }).click();
-      await page.getByRole('dialog', { name: 'Bedroom' }).waitFor();
+      await page.locator('[data-vantilburg-popup="#room-2"] .is-popup-opened').waitFor();
       await capture(page, `popup-${size}-${theme}.png`, true);
-      await page.getByRole('button', { name: 'Close', exact: true }).click();
+      await page.keyboard.press('Escape');
       await page.waitForFunction(() => !location.hash);
       await page.evaluate(() => {
         const card = document.querySelector('home-house-card');

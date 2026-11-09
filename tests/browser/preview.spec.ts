@@ -23,6 +23,15 @@ function makeCard(parent: Node, value = config, preview = true) {
 }
 afterEach(() => { document.body.replaceChildren(); window.loadCardHelpers = undefined; history.replaceState(null, '', '/'); });
 
+it('explains a missing Bubble dependency without navigating or inventing a fallback popup', async () => {
+  const card = makeCard(document.body, config, false); await card.updateComplete;
+  await page.getByRole('button', { name: 'Bedroom 19.0°' }).click();
+  await expect.element(page.getByRole('alert')).toBeVisible();
+  expect(card.shadowRoot!.querySelector('home-overview-popup')!.shadowRoot!.querySelector('[role="alert"]')!.textContent).toContain('Install Bubble Card 3.4.3 or newer');
+  expect(location.hash).toBe('');
+  expect(document.querySelector('[data-vantilburg-popup]')).toBeNull();
+});
+
 it('switches inline preview without navigation, a modal or active child controls', async () => {
   const card = makeCard(document.body); await card.updateComplete;
   const historyLength = history.length;
@@ -81,8 +90,8 @@ it('supports keyboard switching and keeps preview controls off dashboard cards',
   await expect.element(page.getByRole('button', { name: 'Popup', exact: true })).toHaveAttribute('aria-pressed', 'true');
   card.preview = false; await card.updateComplete;
   expect(card.shadowRoot!.querySelector('.preview-switch')).toBeNull();
-  await page.getByRole('button', { name: 'Bedroom 19.0°' }).click();
-  await expect.element(page.getByRole('dialog', { name: 'Bedroom' })).toBeVisible();
+  await expect.element(page.getByRole('button', { name: 'Bedroom 19.0°' })).toBeVisible();
+  expect(card.shadowRoot!.querySelector('home-overview-popup')!.hasAttribute('inline')).toBe(false);
 });
 
 it('does not add the switch to cards in dashboard layout-edit mode', async () => {
