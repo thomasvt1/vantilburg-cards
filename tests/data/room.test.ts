@@ -17,9 +17,10 @@ describe('room data', () => {
   it('supports temperature sensors and Fahrenheit', () => {
     expect(roomReading({ ...config, entity: 'sensor.temp' }, { states: { 'sensor.temp': { state: '68.5', attributes: { unit_of_measurement: '°F' } } } }).text).toBe('68.5°F');
   });
-  it('counts unique lights and distinguishes unavailable from off', () => {
+  it('counts unique lights without an unavailable suffix and preserves fully missing data', () => {
     const lights: RoomConfig = { type: 'custom:home-room-card', lights: ['light.a', 'light.a', 'light.b'] };
-    expect(roomReading(lights, { states: { 'light.a': { state: 'on', attributes: {} } } }).text).toBe('1 light on · 1 unavailable');
+    expect(roomReading(lights, { states: { 'light.a': { state: 'on', attributes: {} } } }).text).toBe('1 light on');
+    expect(roomReading(lights, { states: { 'light.a': { state: 'off', attributes: {} }, 'light.b': { state: 'unavailable', attributes: {} } } }).text).toBe('0 lights on');
     expect(roomReading(lights, { states: {} }).text).toBe('Unavailable');
   });
   it('localizes numbers and labels', () => expect(roomReading({ ...config, language: 'nl' }, hass).text).toBe('20,1°'));

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-11-09
+
+- Remove the unavailable-light count from room summaries, keeping the lights-on count compact.
+
 ## 0.2.0 — 2026-11-09
 
 - Add an editor-only Card / Popup preview toggle that reflects unsaved changes without navigation or device-control actions.

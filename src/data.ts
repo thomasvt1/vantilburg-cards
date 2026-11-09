@@ -24,9 +24,8 @@ export function roomReading(config: RoomConfig, hass: HomeAssistant) {
     const ids = [...new Set(config.lights || [])];
     const states = ids.map(id => hass.states[id]);
     const known = states.filter(e => e && ['on', 'off'].includes(e.state));
-    const missing = states.length - known.length;
     const on = known.filter(e => e?.state === 'on').length;
-    return { mode, text: !known.length ? t.unavailable : t.lights(on) + (missing ? ` · ${t.missing(missing)}` : ''), unavailable: !known.length };
+    return { mode, text: !known.length ? t.unavailable : t.lights(on), unavailable: !known.length };
   }
   const entity = hass.states[config.entity!];
   const attribute = config.attribute ?? (config.entity?.startsWith('climate.') ? 'current_temperature' : undefined);
