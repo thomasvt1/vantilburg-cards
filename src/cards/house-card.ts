@@ -13,7 +13,7 @@ export class HomeHouseCard extends BaseCard {
   protected content() {
     const config = this.config as HouseConfig;
     const readings = config.meters.map(m => meterReading(m, this.hass || { states: {} }));
-    return this.shell(html`${this.row(config.name || this.t.house, config.icon || 'mdi:home-outline', readings.map(r => `${r.name} ${r.text}`).join(' · '), false, true)}<div class="bars">${readings.map((r, i) => {
+    return this.shell(html`${this.row(config.name || this.t.house, config.icon || 'mdi:home-outline', readings.map((r, i) => html`${i ? ' · ' : ''}${this.history(config.meters[i].entity, `${r.name} ${r.text}`)}`), false, true)}<div class="bars">${readings.map((r, i) => {
       const [, track, fill] = this.colors(config.meters[i].palette || (i % 2 ? 'purple' : 'mint'));
       return r.value === undefined
         ? html`<div class="track unavailable" style=${`--meter-track:${track}`} role="img" aria-label=${`${r.name}: ${this.t.unavailable}`}></div>`

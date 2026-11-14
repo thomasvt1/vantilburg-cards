@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 — 2026-11-14
+
+- Open a sensor's details and history from its reading on cards without a popup or tap action: room temperatures, house meters, power tile readings and Energy group device rows.
+- Report the Energy group card's real height to Home Assistant, so masonry views balance their columns by the number of devices instead of treating every card as two rows.
+
 ## 0.4.0 — 2026-11-14
 
 - Add the Energy group card: a group of power sensors with its combined draw, share of home use and devices listed by draw, idle devices muted and unavailable devices kept explicit.

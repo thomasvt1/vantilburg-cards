@@ -13,7 +13,7 @@ export class HomePowerCard extends BaseCard {
   protected content() {
     const config = this.config as PowerConfig;
     const reading = powerReading(config, this.hass || { states: {} });
-    const value = html`<span>${reading.text}</span>${reading.secondary === undefined ? nothing : html`<span class="sub">${reading.secondary}</span>`}`;
+    const value = html`${this.history(config.entity, html`<span>${reading.text}</span>`)}${reading.secondary === undefined ? nothing : this.history(config.secondary_entity, reading.secondary, 'sub')}`;
     return this.shell(this.row(config.name || this.t.power, config.icon || 'mdi:lightning-bolt-outline', value, reading.unavailable, reading.unavailable), 'room power');
   }
 }

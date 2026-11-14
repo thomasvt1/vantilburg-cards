@@ -12,6 +12,6 @@ export class HomeRoomCard extends BaseCard {
   protected content() {
     const config = this.config as RoomConfig;
     const reading = roomReading(config, this.hass || { states: {} });
-    return this.shell(this.row(config.name || this.t.room, config.icon || 'mdi:sofa', reading.text, reading.mode === 'lights' || reading.unavailable), 'room');
+    return this.shell(this.row(config.name || this.t.room, config.icon || 'mdi:sofa', this.history(reading.mode === 'temperature' ? config.entity : undefined, reading.text), reading.mode === 'lights' || reading.unavailable), 'room');
   }
 }

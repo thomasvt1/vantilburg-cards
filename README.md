@@ -70,14 +70,14 @@ HACS normally registers the module automatically. If your resources are managed 
 
 1. Download `vantilburg-cards.js` from the [latest release](https://github.com/thomasvt1/vantilburg-cards/releases/latest), or build it with `npm ci` and `npm run build`.
 2. Copy the asset to `/config/www/vantilburg-cards.js` on Home Assistant.
-3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.4.0` and resource type **JavaScript Module**.
+3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.4.1` and resource type **JavaScript Module**.
 4. Reload the browser. In **Add card**, search for **vanTilburg**.
 
 For dashboards with YAML-managed resources:
 
 ```yaml
 resources:
-  - url: /local/vantilburg-cards.js?v=0.4.0
+  - url: /local/vantilburg-cards.js?v=0.4.1
     type: module
 ```
 
@@ -170,6 +170,8 @@ tap_action:
 ```
 
 Supported actions are `none`, `navigate` (local path/hash), and `more-info` (optional `entity`). Household/device actions belong in popup child cards. A house card needs an explicit entity for `more-info`.
+
+On a card without a popup or tap action, each reading opens its own sensor's details and history: a room temperature, each house meter, both power tile readings and each device row in an Energy group. A computed value, such as a group total, a light count or the unmetered remainder, is not a single sensor and stays plain text. A card with a popup or tap action keeps one action for the whole card, and the editor preview is never interactive.
 
 Room options: `entity`, optional `attribute` (defaults to `current_temperature` for climate entities and state for sensors), `precision` (0–3, default 1), `display` (`auto`, `temperature`, `lights`), and `lights` (entity list). Auto shows temperature when an entity is configured; otherwise it counts lights. Missing sensors show **Unavailable**; missing lights are not counted as off. Celsius uses the compact ° suffix; Fahrenheit remains °F.
 
