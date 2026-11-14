@@ -17,6 +17,10 @@ The live visual editor added a section and a native child card, and saved a chan
 
 The example generator captures every registered card, the popup and the editor preview in both themes at desktop and phone widths. It writes 32 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems. The source digest covers the rendering source and scripts plus the installed versions of Lit, `@mdi/js` and Playwright from `package-lock.json`; the package version and unrelated development tooling do not invalidate the screenshots.
 
+## Negative and fuse-limit meter colors — 0.4.3
+
+Unit tests cover the limit levels in both directions (below 90%, from 90% and from `max`), percentage meters never reaching a limit, the negative flag and `negative_palette` validation. Two browser tests check the negative palette switch (including peach on a purple meter and an explicit `negative_palette`), the amber and red limit colors, `aria-valuetext` with the signed value and limit, and the red reading text. A sheet of every progress-bar state was rendered from the real cards in light and dark themes and reviewed. The suite contains 27 unit tests and 35 browser tests.
+
 ## Signed phase meters — 0.4.2
 
 A live P1 meter reported −0.373 A on a phase exporting solar power, which 0.4.1 showed as an em dash. The scaled-meter unit test now covers negative readings, negative readings beyond `max` and unavailable readings, and checks that percentage meters still reject negative values. The suite contains 27 unit tests and 33 browser tests.

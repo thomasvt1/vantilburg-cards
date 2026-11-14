@@ -66,7 +66,12 @@ describe('scaled house meters', () => {
     const meter = { entity: 'sensor.l2', name: 'L2', max: 25 };
     expect(meterReading(meter, { states: { 'sensor.l2': w('4.6', 'A') } })).toMatchObject({ text: '4.6 A', value: 18.4 });
     expect(meterReading(meter, { states: { 'sensor.l2': w('30', 'A') } })).toMatchObject({ text: '30 A', value: 100 });
-    expect(meterReading(meter, { states: { 'sensor.l2': w('-0.373', 'A') } })).toMatchObject({ text: '-0.4 A', value: 1.492 });
+    expect(meterReading(meter, { states: { 'sensor.l2': w('4.6', 'A') } })).toMatchObject({ negative: false, limit: undefined });
+    // The fuse limit applies in both directions: from 90% of max the meter is high, from max it is over.
+    for (const [state, limit] of [['22.4', undefined], ['22.5', 'high'], ['-22.5', 'high'], ['25', 'over'], ['-25', 'over'], ['-31', 'over']] as const)
+      expect(meterReading(meter, { states: { 'sensor.l2': w(state, 'A') } }).limit).toBe(limit);
+    expect(meterReading({ entity: 'sensor.soc', name: 'Battery' }, { states: { 'sensor.soc': w('100', '%') } }).limit).toBeUndefined();
+    expect(meterReading(meter, { states: { 'sensor.l2': w('-0.373', 'A') } })).toMatchObject({ text: '-0.4 A', value: 1.492, negative: true });
     expect(meterReading(meter, { states: { 'sensor.l2': w('-30', 'A') } })).toMatchObject({ text: '-30 A', value: 100 });
     expect(meterReading(meter, { states: { 'sensor.l2': w('unavailable', 'A') } })).toMatchObject({ text: '—', value: undefined });
     expect(meterReading({ entity: 'sensor.soc', name: 'Battery' }, { states: { 'sensor.soc': w('-5', '%') } })).toMatchObject({ text: '—', value: undefined });
@@ -82,6 +87,7 @@ describe('validation', () => {
     expect(() => validateConfig({ ...group, tap_action: { action: 'more-info' } })).toThrow('tap_action.entity');
     expect(() => validateConfig({ type: 'custom:home-power-card', entity: 'sensor.a', precision: 5 })).toThrow('precision');
     expect(() => validateConfig({ type: 'custom:home-house-card', meters: [{ entity: 'sensor.l1', name: 'L1', max: 0 }] })).toThrow('max');
+    expect(() => validateConfig({ type: 'custom:home-house-card', meters: [{ entity: 'sensor.l1', name: 'L1', max: 25, negative_palette: 'red' as never }] })).toThrow('negative_palette');
     expect(() => validateConfig(group)).not.toThrow();
   });
 });

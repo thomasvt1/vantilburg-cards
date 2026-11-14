@@ -59,6 +59,7 @@ export function validateConfig(config: CardConfig) {
       entity(meter.entity, 'meters.entity');
       if (typeof meter.name !== 'string' || !meter.name.trim()) throw new Error('Each meter needs a name.');
       if (meter.palette !== undefined && !Object.hasOwn(palettes, meter.palette)) throw new Error('Choose a supported meter palette.');
+      if (meter.negative_palette !== undefined && !Object.hasOwn(palettes, meter.negative_palette)) throw new Error('Choose a supported negative_palette.');
       if (meter.max !== undefined && (typeof meter.max !== 'number' || !Number.isFinite(meter.max) || meter.max <= 0)) throw new Error('Meter max must be a positive number.');
     }
     if (action?.action === 'more-info' && !action.entity) throw new Error('Select a tap_action.entity for more-info.');

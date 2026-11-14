@@ -55,6 +55,37 @@ it('renders a power tile with a secondary reading and a scaled phase meter', asy
   await expect.element(page.getByRole('progressbar', { name: 'L2' })).toHaveAttribute('aria-valuenow', '18.4');
 });
 
+it('switches a negative scaled meter to its export palette and announces the signed value', async () => {
+  const phases = new HomeHouseCard();
+  phases.setConfig({ type: 'custom:home-house-card', name: 'Phases', meters: [{ entity: 'sensor.l1', name: 'L1', max: 25, palette: 'blue' }, { entity: 'sensor.l2', name: 'L2', max: 25, palette: 'blue' }, { entity: 'sensor.l3', name: 'L3', max: 25, palette: 'purple' }, { entity: 'sensor.l4', name: 'L4', max: 25, palette: 'blue', negative_palette: 'green' }] });
+  phases.hass = { states: { 'sensor.l1': w('4.6', 'A'), 'sensor.l2': w('-4.6', 'A'), 'sensor.l3': w('-1', 'A'), 'sensor.l4': w('-1', 'A') } };
+  document.body.append(phases); await phases.updateComplete;
+  const bar = (name: string) => phases.shadowRoot!.querySelector<HTMLElement>(`[aria-label="${name}"]`)!;
+  expect(bar('L1').style.getPropertyValue('--meter-fill')).toBe('#246b9a');
+  expect(bar('L2').style.getPropertyValue('--meter-fill')).toBe('#7553a8');
+  expect(bar('L2').style.getPropertyValue('--meter-track')).toBe('#dfd2fa');
+  expect(bar('L3').style.getPropertyValue('--meter-fill')).toBe('#a64d37');
+  expect(bar('L4').style.getPropertyValue('--meter-fill')).toBe('#3c8354');
+  await expect.element(page.getByRole('progressbar', { name: 'L2' })).toHaveAttribute('aria-valuenow', '18.4');
+  await expect.element(page.getByRole('progressbar', { name: 'L2' })).toHaveAttribute('aria-valuetext', '-4.6 A');
+});
+
+it('marks a phase near or over its fuse limit in either direction', async () => {
+  const phases = new HomeHouseCard();
+  phases.setConfig({ type: 'custom:home-house-card', name: 'Phases', meters: [{ entity: 'sensor.l1', name: 'L1', max: 25, palette: 'blue' }, { entity: 'sensor.l2', name: 'L2', max: 25, palette: 'blue' }, { entity: 'sensor.l3', name: 'L3', max: 25, palette: 'blue' }] });
+  phases.hass = { states: { 'sensor.l1': w('23', 'A'), 'sensor.l2': w('-26', 'A'), 'sensor.l3': w('4', 'A') } };
+  document.body.append(phases); await phases.updateComplete;
+  const bar = (name: string) => phases.shadowRoot!.querySelector<HTMLElement>(`[aria-label="${name}"]`)!;
+  expect(bar('L1').style.getPropertyValue('--meter-fill')).toBe('#9a6200');
+  expect(bar('L2').style.getPropertyValue('--meter-fill')).toBe('#b3261e');
+  expect(bar('L3').style.getPropertyValue('--meter-fill')).toBe('#246b9a');
+  await expect.element(page.getByRole('progressbar', { name: 'L1' })).toHaveAttribute('aria-valuetext', '23 A, near limit');
+  await expect.element(page.getByRole('progressbar', { name: 'L2' })).toHaveAttribute('aria-valuetext', '-26 A, over limit');
+  await expect.element(page.getByRole('progressbar', { name: 'L2' })).toHaveAttribute('aria-valuenow', '100');
+  const over = [...phases.shadowRoot!.querySelectorAll('.over-limit')].map(node => node.textContent);
+  expect(over).toEqual(['L2 -26 A']);
+});
+
 it('edits the device list without dropping other options', async () => {
   const editor = new HomeOverviewCardEditor();
   editor.setConfig({ ...config, grid_options: { columns: 6 } } as CardConfig); document.body.append(editor); await editor.updateComplete;

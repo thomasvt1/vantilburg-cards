@@ -70,14 +70,14 @@ HACS normally registers the module automatically. If your resources are managed 
 
 1. Download `vantilburg-cards.js` from the [latest release](https://github.com/thomasvt1/vantilburg-cards/releases/latest), or build it with `npm ci` and `npm run build`.
 2. Copy the asset to `/config/www/vantilburg-cards.js` on Home Assistant.
-3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.4.2` and resource type **JavaScript Module**.
+3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.4.3` and resource type **JavaScript Module**.
 4. Reload the browser. In **Add card**, search for **vanTilburg**.
 
 For dashboards with YAML-managed resources:
 
 ```yaml
 resources:
-  - url: /local/vantilburg-cards.js?v=0.4.2
+  - url: /local/vantilburg-cards.js?v=0.4.3
     type: module
 ```
 
@@ -109,7 +109,7 @@ Preview child controls are inactive, and previewing does not navigate or change 
 | `attribute` | Room | Climate current temperature or sensor state | Explicit temperature attribute. |
 | `precision` | Room, power | `1` (room), `0` (power) | Decimal places, from 0 to 3. Power readings in W/kW ignore it. |
 | `lights` | Room | None | Light entity IDs to count. |
-| `meters` | House | Required | One to six sensors, each with `entity`, `name`, optional `palette` and optional `max` for non-percentage readings. |
+| `meters` | House | Required | One to six sensors, each with `entity`, `name`, optional `palette`, optional `max` for non-percentage readings and optional `negative_palette` for scaled readings below zero. |
 | `type_entity` | Waste | None | Waste type sensor. |
 | `moved_entity` | Waste | None | Bin-out boolean entity. |
 | `type_names` | Waste | English/Dutch defaults | YAML mapping from lowercase waste states to labels. |
@@ -202,7 +202,7 @@ meters:
 
 Sensors must report percentages from 0 to 100. Zero is valid; unavailable, nonnumeric and out-of-range values show an em dash and an empty unavailable track. Meter labels remain visible alongside the bars.
 
-Give a meter a `max` to show any other reading against a full scale, such as the current on each grid phase against its fuse. The summary shows the value with its unit and sign, and the bar fills to `max` by magnitude, so a phase exporting solar power at −4 A shows the same bar as one drawing 4 A. Readings beyond `max` show a full bar.
+Give a meter a `max` to show any other reading against a full scale, such as the current on each grid phase against its fuse. The summary shows the value with its unit and sign, and the bar fills to `max` by magnitude, so a phase exporting solar power at −4 A has the same bar length as one drawing 4 A. Below zero the bar switches to `negative_palette`, which defaults to purple, or to peach on a purple meter. `max` is a limit in both directions, like a fuse: from 90% of `max` the bar turns amber, and at `max` or beyond, in either direction, the bar is full and red and the reading turns red. Screen readers hear the signed value with “near limit” or “over limit”.
 
 ```yaml
 type: custom:home-house-card
