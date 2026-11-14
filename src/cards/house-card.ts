@@ -4,6 +4,7 @@ import { meterReading } from '../data';
 import type { HouseConfig, HomeAssistant } from '../types';
 export class HomeHouseCard extends BaseCard {
   protected get defaultPalette() { return 'neutral' as const; }
+  protected get defaultName() { return this.t.house; }
   static getStubConfig(hass?: HomeAssistant): HouseConfig {
     const entity = Object.keys(hass?.states || {}).find(id => id.startsWith('sensor.') && hass?.states[id]?.attributes.unit_of_measurement === '%') || 'sensor.battery_percentage';
     return { type: 'custom:home-house-card', name: 'House', meters: [{ entity, name: 'Battery', palette: 'mint' }] };

@@ -6,4 +6,5 @@ header button { background:transparent; color:inherit; padding:10px 14px; border
 header button:focus-visible { outline:3px solid #246b9a; }
 body > main { max-width:1040px; margin:auto; display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
 .summary { display:grid; gap:8px; } .rooms { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-@media(max-width:700px) { body { padding:16px; } body > main { grid-template-columns:1fr; gap:20px; } }
+.energy { grid-column:1/-1; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; align-items:start; } .energy home-energy-card,.energy home-house-card { grid-column:span 2; } .energy > * { height:auto; }
+@media(max-width:700px) { body { padding:16px; } body > main { grid-template-columns:1fr; gap:20px; } .energy { grid-template-columns:repeat(2,minmax(0,1fr)); } }

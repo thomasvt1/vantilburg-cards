@@ -8,6 +8,8 @@ const cards = [
   { type: 'home-room-card', slug: 'room', name: 'Room' },
   { type: 'home-house-card', slug: 'house', name: 'House' },
   { type: 'home-waste-card', slug: 'waste', name: 'Waste collection' },
+  { type: 'home-energy-card', slug: 'energy', name: 'Energy group' },
+  { type: 'home-power-card', slug: 'power', name: 'Power' },
 ];
 const files = [];
 const server = await createServer({ root, server: { host: '127.0.0.1', port: 0 } });
@@ -28,7 +30,7 @@ try {
       if (JSON.stringify(registered) !== JSON.stringify(cards.map(card => card.type).sort())) throw new Error('Every registered card needs an example fixture');
       await page.evaluate(async () => {
         await document.fonts.ready;
-        await Promise.all([...document.querySelectorAll('home-room-card, home-house-card, home-waste-card')].map(card => card.updateComplete));
+        await Promise.all([...document.querySelectorAll('home-room-card, home-house-card, home-waste-card, home-energy-card, home-power-card')].map(card => card.updateComplete));
       });
       async function capture(target, file, fullPage = false) {
         await target.screenshot({ path: resolve(root, 'examples', file), ...(fullPage ? { fullPage: true } : {}), animations: 'disabled' });
@@ -56,7 +58,7 @@ try {
   }
   const gallery = [
     '<!-- BEGIN GENERATED EXAMPLES -->',
-    '![All three vanTilburg cards, desktop light theme with synthetic data](examples/desktop-light.png)',
+    '![All vanTilburg cards, desktop light theme with synthetic data](examples/desktop-light.png)',
     '',
     'Full dashboards: [desktop dark](examples/desktop-dark.png) · [phone light](examples/mobile-light.png) · [phone dark](examples/mobile-dark.png)',
     '', '### Card previews', '',

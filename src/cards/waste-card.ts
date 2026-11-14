@@ -3,6 +3,7 @@ import { wasteReading } from '../data';
 import type { WasteConfig } from '../types';
 export class HomeWasteCard extends BaseCard {
   protected get defaultPalette() { return 'mint' as const; }
+  protected get defaultName() { return this.t.waste; }
   static getStubConfig(): WasteConfig { return { type: 'custom:home-waste-card', entity: 'sensor.collection_days', palette: 'mint' }; }
   protected entityIds() { const config = this.config as WasteConfig; return [config.entity, config.type_entity, config.moved_entity]; }
   protected content() {
