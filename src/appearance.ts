@@ -11,3 +11,8 @@ export const palettes: Record<Palette, { light: string[]; dark: string[] }> = {
   mint: { light: ['#eef8f4', '#d2ecdf', '#3e8269'], dark: ['#203f35', '#315e4d', '#99dfbf'] },
   neutral: { light: ['#ffffff', '#d6e5ee', '#52758e'], dark: ['#222b35', '#3b5668', '#b4d7ed'] },
 };
+/** Track and fill for scaled meters near or over their limit, such as a phase current near its fuse. */
+export const limitColors: Record<'high' | 'over', { light: [string, string]; dark: [string, string] }> = {
+  high: { light: ['#ffe2a8', '#9a6200'], dark: ['#6e5524', '#ffd27a'] },
+  over: { light: ['#f8cccc', '#b3261e'], dark: ['#6e3434', '#ffb4ab'] },
+};

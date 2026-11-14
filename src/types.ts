@@ -40,7 +40,7 @@ export interface RoomConfig extends CommonConfig {
   display?: 'auto' | 'temperature' | 'lights';
   precision?: number;
 }
-export interface MeterConfig { entity: string; name: string; palette?: Palette; max?: number }
+export interface MeterConfig { entity: string; name: string; palette?: Palette; max?: number; negative_palette?: Palette }
 export interface HouseConfig extends CommonConfig { type: 'custom:home-house-card'; meters: MeterConfig[] }
 export interface WasteConfig extends CommonConfig {
   type: 'custom:home-waste-card'; entity: string; type_entity?: string; moved_entity?: string;

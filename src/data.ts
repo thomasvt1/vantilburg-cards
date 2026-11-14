@@ -13,8 +13,8 @@ export function language(hass: HomeAssistant, override?: string): 'en' | 'nl' {
   return (override && override !== 'auto' ? override : hass.locale?.language || hass.language || 'en').startsWith('nl') ? 'nl' : 'en';
 }
 export const words = {
-  en: { unavailable: 'Unavailable', room: 'Room', house: 'House', waste: 'Trash collection', today: 'Collection today', tomorrow: 'Collection tomorrow', inDays: (n: number) => `Collection in ${n} days`, scheduleUnavailable: 'Schedule unavailable', binOut: 'Bin put out', viewSchedule: 'View schedule', lights: (n: number) => `${n} ${n === 1 ? 'light' : 'lights'} on`, missing: (n: number) => `${n} unavailable`, energy: 'Energy', power: 'Power', active: (n: number) => `${n} active`, standby: 'Standby', notMetered: 'Home use minus plugs', metered: 'Metered by plugs', share: 'Share of home use' },
-  nl: { unavailable: 'Niet beschikbaar', room: 'Kamer', house: 'Huis', waste: 'Afvalinzameling', today: 'Vandaag ophalen', tomorrow: 'Morgen ophalen', inDays: (n: number) => `Ophalen over ${n} dagen`, scheduleUnavailable: 'Planning niet beschikbaar', binOut: 'Container buiten', viewSchedule: 'Bekijk planning', lights: (n: number) => `${n} ${n === 1 ? 'lamp' : 'lampen'} aan`, missing: (n: number) => `${n} niet beschikbaar`, energy: 'Energie', power: 'Vermogen', active: (n: number) => `${n} actief`, standby: 'Stand-by', notMetered: 'Thuisverbruik min stekkers', metered: 'Gemeten door stekkers', share: 'Aandeel van thuisverbruik' },
+  en: { unavailable: 'Unavailable', room: 'Room', house: 'House', waste: 'Trash collection', today: 'Collection today', tomorrow: 'Collection tomorrow', inDays: (n: number) => `Collection in ${n} days`, scheduleUnavailable: 'Schedule unavailable', binOut: 'Bin put out', viewSchedule: 'View schedule', lights: (n: number) => `${n} ${n === 1 ? 'light' : 'lights'} on`, missing: (n: number) => `${n} unavailable`, energy: 'Energy', power: 'Power', active: (n: number) => `${n} active`, standby: 'Standby', notMetered: 'Home use minus plugs', metered: 'Metered by plugs', share: 'Share of home use', nearLimit: 'near limit', overLimit: 'over limit' },
+  nl: { unavailable: 'Niet beschikbaar', room: 'Kamer', house: 'Huis', waste: 'Afvalinzameling', today: 'Vandaag ophalen', tomorrow: 'Morgen ophalen', inDays: (n: number) => `Ophalen over ${n} dagen`, scheduleUnavailable: 'Planning niet beschikbaar', binOut: 'Container buiten', viewSchedule: 'Bekijk planning', lights: (n: number) => `${n} ${n === 1 ? 'lamp' : 'lampen'} aan`, missing: (n: number) => `${n} niet beschikbaar`, energy: 'Energie', power: 'Vermogen', active: (n: number) => `${n} actief`, standby: 'Stand-by', notMetered: 'Thuisverbruik min stekkers', metered: 'Gemeten door stekkers', share: 'Aandeel van thuisverbruik', nearLimit: 'bijna op limiet', overLimit: 'boven limiet' },
 };
 
 export function roomReading(config: RoomConfig, hass: HomeAssistant) {
@@ -44,11 +44,14 @@ export function meterReading(config: MeterConfig, hass: HomeAssistant) {
     const unit = entity?.attributes.unit_of_measurement;
     const lang = language(hass);
     const text = value === undefined ? '—' : new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(value) + (typeof unit === 'string' && unit ? ` ${unit}` : '');
-    return { name: config.name, value: value === undefined ? undefined : Math.min(100, (Math.abs(value) / config.max) * 100), text };
+    // A fuse limits the current in both directions, so the limit applies to the magnitude.
+    const ratio = value === undefined ? 0 : Math.abs(value) / config.max;
+    const limit: 'high' | 'over' | undefined = ratio >= 1 ? 'over' : ratio >= 0.9 ? 'high' : undefined;
+    return { name: config.name, value: value === undefined ? undefined : Math.min(100, ratio * 100), text, negative: value !== undefined && value < 0, limit };
   }
   // A percentage outside its valid range is not a real charge reading.
   const percentage = value !== undefined && value >= 0 && value <= 100 ? value : undefined;
-  return { name: config.name, value: percentage, text: percentage === undefined ? '—' : `${Math.round(percentage)}%` };
+  return { name: config.name, value: percentage, text: percentage === undefined ? '—' : `${Math.round(percentage)}%`, negative: false, limit: undefined as 'high' | 'over' | undefined };
 }
 
 const powerScale: Record<string, number> = { W: 1, kW: 1000, MW: 1_000_000 };

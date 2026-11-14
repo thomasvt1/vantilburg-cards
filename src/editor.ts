@@ -81,13 +81,14 @@ export class HomeOverviewCardEditor extends LitElement {
     if (!this.config) return nothing;
     const action = this.config.tap_action || { action: 'none' };
     return html`<ha-form .hass=${this.hass} .schema=${this.fields()} .data=${{ ...this.defaults(), ...this.config }} .computeLabel=${this.label} @value-changed=${this.updateFields}></ha-form>
-      ${this.config.type === 'custom:home-house-card' ? html`<h3>Meters</h3>${this.config.meters.map((meter, index) => html`<div class="meter"><ha-form .hass=${this.hass} .schema=${[entity('entity', 'Sensor', 'sensor'), text('name', 'Label'), palette, { name: 'max', label: 'Full scale (optional; leave empty for 0–100%)', selector: { number: { min: 0, step: 0.1, mode: 'box' } } }]} .data=${meter} .computeLabel=${this.label} @value-changed=${(event: CustomEvent<{ value: Record<string, unknown> }>) => {
+      ${this.config.type === 'custom:home-house-card' ? html`<h3>Meters</h3>${this.config.meters.map((meter, index) => html`<div class="meter"><ha-form .hass=${this.hass} .schema=${[entity('entity', 'Sensor', 'sensor'), text('name', 'Label'), palette, { name: 'max', label: 'Full scale (optional; leave empty for 0–100%)', selector: { number: { min: 0, step: 0.1, mode: 'box' } } }, ...(meter.max === undefined ? [] : [select('negative_palette', 'Color below zero (optional)', Object.keys(palettes))])]} .data=${meter} .computeLabel=${this.label} @value-changed=${(event: CustomEvent<{ value: Record<string, unknown> }>) => {
         event.stopPropagation(); const config = this.config as HouseConfig;
         const meters = config.meters.map((m, i) => {
           if (i !== index) return m;
           const next = { ...m, ...event.detail.value };
           if (!next.palette) delete next.palette;
-          if (typeof next.max !== 'number' || next.max <= 0) delete next.max;
+          if (typeof next.max !== 'number' || next.max <= 0) { delete next.max; delete next.negative_palette; }
+          if (!next.negative_palette) delete next.negative_palette;
           return next;
         });
         this.emit({ ...config, meters });

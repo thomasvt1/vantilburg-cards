@@ -58,6 +58,7 @@ export abstract class BaseCard extends LitElement {
     button.history { display:inline; width:auto; margin:0 -4px; padding:0 4px; border-radius:6px; text-align:inherit; }
     .room .value .sub.history { display:block; width:fit-content; margin-top:2px; }
     .devices button.history { flex:none; display:flex; justify-content:space-between; align-items:center; gap:12px; width:calc(100% + 16px); min-height:28px; margin:0 -8px; padding:0 8px; border-radius:8px; }
+    .over-limit { color:color-mix(in srgb,#d93025 72%,var(--primary-text-color,#17212c)); font-weight:600; }
     button.history:focus-visible { outline:2px solid var(--hoc-accent); outline-offset:1px; }
     .preview-switch { display:flex; gap:4px; margin-bottom:12px; padding:4px; border:1px solid var(--divider-color,#ddd); border-radius:12px; }
     .preview-switch button { width:auto; flex:1; min-height:40px; padding:8px 12px; text-align:center; border-radius:8px; color:var(--primary-text-color,#17212c); }

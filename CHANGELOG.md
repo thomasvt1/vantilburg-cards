@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3 — 2026-11-14
+
+- Show House meter readings below zero in a separate color: purple by default, peach on a purple meter, or the meter's new `negative_palette`. The bar length still shows the magnitude, and screen readers hear the signed value.
+- Treat a House meter's `max` as a limit in both directions, like a fuse: amber from 90% of `max`, and a red bar and red reading at or beyond it, with “near limit” and “over limit” for screen readers.
+
 ## 0.4.2 — 2026-11-14
 
 - Show negative readings on House meters with a `max`, such as a grid phase exporting solar power, instead of an em dash. The value keeps its sign and the bar shows its magnitude.
