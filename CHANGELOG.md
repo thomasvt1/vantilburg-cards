@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Re-render cards only when their own entities, theme, locale or units change; still forward state to popup children.
+- Rebuild the Bubble popup configuration only when the popup, title, icon or theme changes.
+- Create the popup after a disconnect/reconnect interrupts loading, instead of waiting for the next state update.
+- Stop the package version and unrelated dev dependencies from invalidating the committed example screenshots.
+- Cache the Bubble Card fixture and Playwright Chromium in CI, and retry the fixture download.
+
 ## 0.3.0 — 2026-11-09
 
 - Replace the custom dialog with Bubble Card's native standalone popup, preserving its scrolling, positioning, animations, gestures and close behavior.

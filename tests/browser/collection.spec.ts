@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, expect, it } from 'vitest';
+import { afterEach, beforeAll, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { HomeHouseCard } from '../../src/cards/house-card';
 import { HomeWasteCard } from '../../src/cards/waste-card';
@@ -79,6 +79,33 @@ it('supports browser back, forward and direct hash links', async () => {
   await userEvent.keyboard('{Escape}');
   await expect.poll(() => location.hash).toBe('');
   location.hash = '#bedroom'; await expect.element(page.getByText('Child one')).toBeVisible();
+});
+it('forwards unrelated state to popup children without re-rendering the card or rebuilding Bubble', async () => {
+  const card = await popupCard();
+  await page.getByRole('button', { name: 'Bedroom 19.0°' }).click();
+  await expect.element(page.getByText('Child one')).toBeVisible();
+  const bubble = document.querySelector<CardElement>('[data-vantilburg-popup] bubble-card')!;
+  const setConfig = vi.spyOn(bubble, 'setConfig');
+  const content = vi.spyOn(card as unknown as { content(): unknown }, 'content');
+  const temp = card.hass.states['sensor.temp'];
+  card.hass = { states: { 'sensor.temp': temp, 'sensor.value': { state: 'two', attributes: {} } } }; await card.updateComplete;
+  await expect.element(page.getByText('Child two')).toBeVisible();
+  expect(content).not.toHaveBeenCalled(); expect(setConfig).not.toHaveBeenCalled();
+  card.hass = { ...card.hass, states: { ...card.hass.states, 'sensor.temp': { state: '21', attributes: {} } } }; await card.updateComplete;
+  expect(content).toHaveBeenCalled(); expect(setConfig).not.toHaveBeenCalled();
+  card.hass = { ...card.hass, themes: { darkMode: true } }; await card.updateComplete;
+  await expect.poll(() => setConfig.mock.calls.length).toBe(1);
+});
+it('creates the popup when a reconnect interrupts loading', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  window.loadCardHelpers = async () => { await gate; return { createCardElement: config => { const card = config.type === 'custom:bubble-card' ? document.createElement('bubble-card') as CardElement : new TestChildCard(); card.setConfig(config); return card; } }; };
+  const card = new HomeRoomCard();
+  card.setConfig({ type: 'custom:home-room-card', name: 'Bedroom', entity: 'sensor.temp', popup: { hash: '#bedroom', sections: [{ cards: [{ type: 'test-child-card' }] }] } });
+  card.hass = { states: { 'sensor.temp': { state: '19', attributes: {} } } }; document.body.append(card); await card.updateComplete;
+  await new Promise(resolve => setTimeout(resolve));
+  card.remove(); document.body.append(card); release();
+  await expect.poll(() => document.querySelectorAll('[data-vantilburg-popup] bubble-card').length).toBe(1);
 });
 it('removes popup listeners when a card disconnects', async () => {
   const card = await popupCard();

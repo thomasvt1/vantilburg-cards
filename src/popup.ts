@@ -66,7 +66,11 @@ export class HomeOverviewPopup extends LitElement {
       if (this.cardConfig !== this.config && this.config) void this.loadCards();
       return;
     }
-    void this.ensureBubble();
+    // Rebuilding the Bubble config resolves computed styles and serializes every
+    // child; plain state updates only need to reach Bubble, which forwards them.
+    const themeChanged = changed.has('hass') && (changed.get('hass') as HomeAssistant | undefined)?.themes !== this.hass?.themes;
+    if (!this.bubble || themeChanged || changed.has('config') || changed.has('title') || changed.has('icon')) void this.ensureBubble();
+    else if (changed.has('hass')) this.bubble.hass = this.hass;
   }
   async open() {
     if (!this.config || this.inline) return;
@@ -87,10 +91,12 @@ export class HomeOverviewPopup extends LitElement {
       this.error = 'Install Bubble Card 3.4.3 or newer through HACS, then reload the dashboard to use popups.';
       return;
     }
-    if (this.loading) { await this.loading; if (!this.bubble) return; }
+    // A load abandoned by a disconnect leaves no bubble; a reconnect must retry it.
+    while (this.loading) await this.loading;
+    if (!this.isConnected || this.inline) return;
     if (!this.bubble) {
       const generation = this.generation;
-      this.loading = (async () => {
+      const loading = this.loading = (async () => {
         try {
           if (!window.loadCardHelpers) throw new Error('Home Assistant card helpers are not available. Reload the dashboard.');
           const helpers = await window.loadCardHelpers();
@@ -110,7 +116,7 @@ export class HomeOverviewPopup extends LitElement {
           this.error = '';
         } catch (error) { this.error = error instanceof Error ? error.message : 'Could not load Bubble Card.'; this.removeBubble(); }
       })();
-      try { await this.loading; } finally { this.loading = undefined; }
+      try { await loading; } finally { if (this.loading === loading) this.loading = undefined; }
     }
     if (this.bubble) {
       const config = this.runtimeConfig(), signature = JSON.stringify(config);

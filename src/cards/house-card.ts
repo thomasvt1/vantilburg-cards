@@ -8,6 +8,7 @@ export class HomeHouseCard extends BaseCard {
     const entity = Object.keys(hass?.states || {}).find(id => id.startsWith('sensor.') && hass?.states[id]?.attributes.unit_of_measurement === '%') || 'sensor.battery_percentage';
     return { type: 'custom:home-house-card', name: 'House', meters: [{ entity, name: 'Battery', palette: 'mint' }] };
   }
+  protected entityIds() { return (this.config as HouseConfig).meters.map(meter => meter.entity); }
   protected content() {
     const config = this.config as HouseConfig;
     const readings = config.meters.map(m => meterReading(m, this.hass || { states: {} }));
