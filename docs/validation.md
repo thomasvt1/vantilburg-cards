@@ -17,6 +17,10 @@ The live visual editor added a section and a native child card, and saved a chan
 
 The example generator captures every registered card, the popup and the editor preview in both themes at desktop and phone widths. It writes 32 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems. The source digest covers the rendering source and scripts plus the installed versions of Lit, `@mdi/js` and Playwright from `package-lock.json`; the package version and unrelated development tooling do not invalidate the screenshots.
 
+## Signed phase meters — 0.4.2
+
+A live P1 meter reported −0.373 A on a phase exporting solar power, which 0.4.1 showed as an em dash. The scaled-meter unit test now covers negative readings, negative readings beyond `max` and unavailable readings, and checks that percentage meters still reject negative values. The suite contains 27 unit tests and 33 browser tests.
+
 ## Reading history and card heights — 0.4.1
 
 Five browser tests cover opening history from Energy group device rows (not the computed total), both power tile readings, individual house meters and a room temperature, plain readings on cards with their own action and in the editor preview, and the Energy group's reported height against its rendered height for one, two and four devices. The suite now contains 27 unit tests and 33 browser tests. Energy and power example PNGs were byte-identical to 0.4.0; the popup examples differ only by a few bytes from the popup animation's capture timing.

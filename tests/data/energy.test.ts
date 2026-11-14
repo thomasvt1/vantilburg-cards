@@ -62,11 +62,14 @@ describe('power tile', () => {
 });
 
 describe('scaled house meters', () => {
-  it('shows the unit, scales against max and caps the bar at full', () => {
+  it('shows the unit and sign, scales the magnitude against max and caps the bar at full', () => {
     const meter = { entity: 'sensor.l2', name: 'L2', max: 25 };
     expect(meterReading(meter, { states: { 'sensor.l2': w('4.6', 'A') } })).toMatchObject({ text: '4.6 A', value: 18.4 });
     expect(meterReading(meter, { states: { 'sensor.l2': w('30', 'A') } })).toMatchObject({ text: '30 A', value: 100 });
-    expect(meterReading(meter, { states: { 'sensor.l2': w('-1', 'A') } })).toMatchObject({ text: '—', value: undefined });
+    expect(meterReading(meter, { states: { 'sensor.l2': w('-0.373', 'A') } })).toMatchObject({ text: '-0.4 A', value: 1.492 });
+    expect(meterReading(meter, { states: { 'sensor.l2': w('-30', 'A') } })).toMatchObject({ text: '-30 A', value: 100 });
+    expect(meterReading(meter, { states: { 'sensor.l2': w('unavailable', 'A') } })).toMatchObject({ text: '—', value: undefined });
+    expect(meterReading({ entity: 'sensor.soc', name: 'Battery' }, { states: { 'sensor.soc': w('-5', '%') } })).toMatchObject({ text: '—', value: undefined });
   });
 });
 
