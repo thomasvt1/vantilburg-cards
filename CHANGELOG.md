@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2 — 2026-11-14
+
+- Show negative readings on House meters with a `max`, such as a grid phase exporting solar power, instead of an em dash. The value keeps its sign and the bar shows its magnitude.
+
 ## 0.4.1 — 2026-11-14
 
 - Open a sensor's details and history from its reading on cards without a popup or tap action: room temperatures, house meters, power tile readings and Energy group device rows.

@@ -1,5 +1,5 @@
 {
-  "inputDigest": "c707e4f40c947831cece7730c0a7841c03d2049c53f7982b6b005d9d1460df02",
+  "inputDigest": "69c4ea9213d94a9cab5b323ac48355f545572cae9d8aae2f26d4a70dceae5009",
   "files": [
     "desktop-dark.png",
     "desktop-light.png",
@@ -49,7 +49,7 @@
     "waste-desktop-dark.png": "28dcc0a882c8a38a4bac5f96a211d7ceaf3ec0588a3636907af7dfdeb4ad67e0",
     "energy-desktop-dark.png": "74b3b4e644b5fdf40f3cf548151d468b9ea72c35454e5f1d3ab1fee2ee562986",
     "power-desktop-dark.png": "064a54957698475c4fb98f5e0cb824bfedb0eafff0de6753dfe9646454c120b2",
-    "popup-desktop-dark.png": "9c6175fe078d117edeb602535ae1b604f449e6663d83df640037c8d746e2f258",
+    "popup-desktop-dark.png": "e9956349172d1b9ec2ab141098d3134ba7eaa2d6e28220919142a0a5b46cf367",
     "editor-desktop-dark.png": "dbcabdc4abc75a5088cffafc31bf634a7fbe76bd79b99d2a15ba749e793c8d8c",
     "mobile-light.png": "c2f5adf1a8ff2b04311a8c27fa88ac9a670fb5c9fe2e9fe4a8a949629cb27848",
     "room-mobile-light.png": "09da28af6fa5f88fb2bd24b102e977616d2d777fe41576ac3e24452d7115442b",
@@ -65,7 +65,7 @@
     "waste-mobile-dark.png": "547c6208ff5198365ea25e6a73bec0319b7f36e4878e65dbf28160916905f16c",
     "energy-mobile-dark.png": "84b8c192050b79bb0e98d699fd31c225d762b984b39e28fe3dc7bc987182af04",
     "power-mobile-dark.png": "d318b280680efba17193e3fe5e42f7abdb66c70842115e540e8f133dad4973c8",
-    "popup-mobile-dark.png": "2758acba78a9ce899c24adaaad44017ada8e9424f1bd602e8116415d529a65de",
+    "popup-mobile-dark.png": "f74eb5440f215d94fa940d8afb7a92e1e8c55451863edf0585718e11b9f1d949",
     "editor-mobile-dark.png": "c8878d46d1ad923772e3b7b51bd029c9728f3e8182b95e4f4f1c1e0371d286d6"
   }
 }

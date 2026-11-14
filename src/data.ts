@@ -39,12 +39,12 @@ export function meterReading(config: MeterConfig, hass: HomeAssistant) {
   const entity = hass.states[config.entity];
   const value = available(entity) ? numeric(entity.state) : undefined;
   if (config.max !== undefined) {
-    // A scaled meter (for example phase current against its fuse) may exceed max; the bar stops at full.
-    const reading = value !== undefined && value >= 0 ? value : undefined;
+    // A scaled meter (for example phase current against its fuse) keeps its sign: P1 meters report a
+    // phase that exports solar power as negative current. The bar shows the magnitude and stops at full.
     const unit = entity?.attributes.unit_of_measurement;
     const lang = language(hass);
-    const text = reading === undefined ? '—' : new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(reading) + (typeof unit === 'string' && unit ? ` ${unit}` : '');
-    return { name: config.name, value: reading === undefined ? undefined : Math.min(100, (reading / config.max) * 100), text };
+    const text = value === undefined ? '—' : new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(value) + (typeof unit === 'string' && unit ? ` ${unit}` : '');
+    return { name: config.name, value: value === undefined ? undefined : Math.min(100, (Math.abs(value) / config.max) * 100), text };
   }
   // A percentage outside its valid range is not a real charge reading.
   const percentage = value !== undefined && value >= 0 && value <= 100 ? value : undefined;

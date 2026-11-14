@@ -6,7 +6,7 @@ vanTilburg Cards consumes explicitly configured Home Assistant entities. It does
 | --- | --- | --- |
 | Room temperature | Climate `current_temperature`, sensor state, or a configured attribute; precision 0–3 | Shows Unavailable. Celsius uses °; Fahrenheit retains °F. |
 | Room lights | List of light entity IDs; duplicate IDs count once | Missing/unavailable lights are reported separately, not counted as off. |
-| House | One to six named numeric percentage sensors in the range 0–100, or nonnegative readings with a `max` | Shows an em dash and an unavailable empty track. Zero is valid. Readings above `max` show a full bar. |
+| House | One to six named numeric percentage sensors in the range 0–100, or signed numeric readings with a `max` | Shows an em dash and an unavailable empty track. Zero is valid. With `max`, the bar shows the magnitude, so negative export current is valid; readings beyond `max` show a full bar. |
 | Waste | Nonnegative integer days until collection; optional waste type and bin-out boolean | Missing/invalid days show unavailable, not today. The card never resets the bin-out flag. |
 | Energy group | 1–30 power sensors in W, kW or MW; optional home consumption sensor | Unavailable devices are listed as Unavailable and left out of the total. With no available device the total is Unavailable, not 0 W. kWh and unitless sensors are not power. A remainder below zero shows 0 W. |
 | Power | Any numeric sensor; optional second numeric sensor | Shows Unavailable. W/kW/MW use power formatting; other units keep their unit. |

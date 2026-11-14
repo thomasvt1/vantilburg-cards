@@ -70,14 +70,14 @@ HACS normally registers the module automatically. If your resources are managed 
 
 1. Download `vantilburg-cards.js` from the [latest release](https://github.com/thomasvt1/vantilburg-cards/releases/latest), or build it with `npm ci` and `npm run build`.
 2. Copy the asset to `/config/www/vantilburg-cards.js` on Home Assistant.
-3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.4.1` and resource type **JavaScript Module**.
+3. Add a dashboard resource with URL `/local/vantilburg-cards.js?v=0.4.2` and resource type **JavaScript Module**.
 4. Reload the browser. In **Add card**, search for **vanTilburg**.
 
 For dashboards with YAML-managed resources:
 
 ```yaml
 resources:
-  - url: /local/vantilburg-cards.js?v=0.4.1
+  - url: /local/vantilburg-cards.js?v=0.4.2
     type: module
 ```
 
@@ -202,7 +202,7 @@ meters:
 
 Sensors must report percentages from 0 to 100. Zero is valid; unavailable, nonnumeric and out-of-range values show an em dash and an empty unavailable track. Meter labels remain visible alongside the bars.
 
-Give a meter a `max` to show any other nonnegative reading against a full scale, such as the current on each grid phase against its fuse. The summary shows the value with its unit and the bar fills to `max`; readings above `max` show a full bar.
+Give a meter a `max` to show any other reading against a full scale, such as the current on each grid phase against its fuse. The summary shows the value with its unit and sign, and the bar fills to `max` by magnitude, so a phase exporting solar power at −4 A shows the same bar as one drawing 4 A. Readings beyond `max` show a full bar.
 
 ```yaml
 type: custom:home-house-card
