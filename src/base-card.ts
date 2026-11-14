@@ -55,6 +55,10 @@ export abstract class BaseCard extends LitElement {
     .devices .device-name { min-width:0; overflow-wrap:anywhere; }
     .devices .reading { font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .devices .idle .reading { font-weight:400; color:var(--secondary-text-color,#526170); }
+    button.history { display:inline; width:auto; margin:0 -4px; padding:0 4px; border-radius:6px; text-align:inherit; }
+    .room .value .sub.history { display:block; width:fit-content; margin-top:2px; }
+    .devices button.history { flex:none; display:flex; justify-content:space-between; align-items:center; gap:12px; width:calc(100% + 16px); min-height:28px; margin:0 -8px; padding:0 8px; border-radius:8px; }
+    button.history:focus-visible { outline:2px solid var(--hoc-accent); outline-offset:1px; }
     .preview-switch { display:flex; gap:4px; margin-bottom:12px; padding:4px; border:1px solid var(--divider-color,#ddd); border-radius:12px; }
     .preview-switch button { width:auto; flex:1; min-height:40px; padding:8px 12px; text-align:center; border-radius:8px; color:var(--primary-text-color,#17212c); }
     .preview-switch button[aria-pressed="true"] { background:var(--hoc-icon-bg); color:var(--hoc-accent); font-weight:600; }
@@ -62,6 +66,7 @@ export abstract class BaseCard extends LitElement {
   `;
   setConfig(config: CardConfig) { validateConfig(config); this.config = structuredClone(config); }
   static getConfigElement() { return document.createElement('home-overview-card-editor'); }
+  /** Height in 50px units, which masonry views use to balance their columns. */
   getCardSize() { return 2; }
   private get editorPreview() { return this.preview && !!previewOwner(this); }
   getGridOptions() { return { columns: this.editorPreview && this.config?.popup && previewMode(this) === 'popup' ? 12 : ['custom:home-room-card', 'custom:home-power-card'].includes(this.config?.type) ? 6 : 12, rows: 'auto', min_columns: 3 }; }
@@ -116,6 +121,18 @@ export abstract class BaseCard extends LitElement {
   protected row(name: string, icon: string, value: unknown, small = false, secondary = false) {
     return html`<div class="row"><span class="badge" aria-hidden="true"><ha-icon .icon=${icon}></ha-icon></span><div><div class="name">${name}</div><div class=${`value ${small ? 'small' : ''} ${secondary ? 'secondary' : ''}`}>${value}</div></div>${this.arrow()}</div>`;
   }
+  /**
+   * A reading that opens its sensor's more-info dialog with history. A card with its own
+   * tap action or popup is already one button, so its readings stay plain text there,
+   * as they do in the noninteractive editor preview.
+   */
+  protected history(entityId: string | undefined, body: unknown, className = '') {
+    if (!entityId || this.actionable || this.preview) return className ? html`<span class=${className}>${body}</span>` : body;
+    return html`<button type="button" class=${`history ${className}`} @click=${() => this.moreInfo(entityId)}>${body}</button>`;
+  }
+  private moreInfo(entityId: string) {
+    this.dispatchEvent(new CustomEvent('hass-more-info', { bubbles: true, composed: true, detail: { entityId } }));
+  }
   protected get actionable() { return !!this.config.popup || !!this.config.tap_action && this.config.tap_action.action !== 'none'; }
   protected arrow() {
     return this.actionable ? html`<svg class="arrow" viewBox="0 0 16 24" aria-hidden="true"><path d="m5 8 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` : nothing;
@@ -129,7 +146,7 @@ export abstract class BaseCard extends LitElement {
       window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
     } else if (action?.action === 'more-info') {
       const entityId = action.entity || ('entity' in this.config ? this.config.entity : undefined);
-      if (entityId) this.dispatchEvent(new CustomEvent('hass-more-info', { bubbles: true, composed: true, detail: { entityId } }));
+      if (typeof entityId === 'string' && entityId) this.moreInfo(entityId);
     }
   }
 }

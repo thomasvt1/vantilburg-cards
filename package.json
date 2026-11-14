@@ -1,6 +1,6 @@
 {
   "name": "vantilburg-cards",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Soft, compact Home Assistant cards for rooms, household storage, waste collection and energy use",
   "type": "module",
   "license": "AGPL-3.0-or-later",
