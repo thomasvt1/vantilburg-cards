@@ -15,7 +15,7 @@ The live visual editor added a section and a native child card, and saved a chan
 
 ## Repository conventions
 
-The example generator captures all three registered cards, the popup and the editor preview in both themes at desktop and phone widths. It writes 24 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems.
+The example generator captures all three registered cards, the popup and the editor preview in both themes at desktop and phone widths. It writes 24 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems. The source digest covers the rendering source and scripts plus the installed versions of Lit, `@mdi/js` and Playwright from `package-lock.json`; the package version and unrelated development tooling do not invalidate the screenshots.
 
 ## Editor popup preview — 0.2.0
 
@@ -34,6 +34,14 @@ The production adapter instantiates the installed `custom:bubble-card` with stan
 The browser integration suite loads the real official Bubble Card v3.4.3 bundle, pinned by SHA-256. It checks opening, Escape, Back/Forward and hash navigation, child state updates, removal on disconnect, and propagation of child more-info events through a Home Assistant shadow-root fixture. A separate test checks the missing-dependency message. There are 17 unit tests and 21 browser tests. The fixture is downloaded for development/tests only and is excluded from the distributed bundle; generated popup screenshots also use that real runtime.
 
 The household preview was checked with the same installed Bubble Card v3.4.3: desktop and 390px layouts, scrolling to the climate controls, close button, Escape, and opening the native Home Assistant climate details panel from a Quatt child card. No device-control commands were sent. The main dashboard remained on its restored original configuration. Physical touch swipes and separate Firefox/Safari runs have not been verified.
+
+## Rendering efficiency — Unreleased
+
+Cards now re-render only when their own entities, theme, locale or unit configuration change. Other Home Assistant state updates are forwarded to the popup without re-rendering the summary card. The Bubble popup configuration is rebuilt only when the popup configuration, title, icon or theme changes; plain state updates are passed to Bubble directly. A popup whose loading is interrupted by a disconnect and reconnect is now created after the reconnect, without waiting for the next state update.
+
+Two added browser tests cover these paths: a popup child receives unrelated state without re-rendering the card or calling Bubble's `setConfig`, while a theme change rebuilds the configuration once; and a reconnect during loading produces exactly one popup. Both tests fail on 0.3.0. There are 17 unit tests and 23 browser tests. All 24 regenerated example PNGs were byte-identical to 0.3.0. These changes have not yet been checked in a live Home Assistant dashboard.
+
+CI caches the pinned Bubble Card fixture and Playwright's headless Chromium. The fixture download uses a 30-second timeout and up to three attempts.
 
 ## Compatibility boundaries
 

@@ -1,4 +1,4 @@
-import { LitElement, css, html, nothing } from 'lit';
+import { LitElement, css, html, nothing, type PropertyValues } from 'lit';
 import { palettes } from './appearance';
 import { validateConfig } from './config';
 import { language, words } from './data';
@@ -62,6 +62,21 @@ export abstract class BaseCard extends LitElement {
   protected colors(palette: Palette) { return palettes[palette][this.dark ? 'dark' : 'light']; }
   protected abstract content(): unknown;
   protected abstract get defaultPalette(): Palette;
+  /** Entities shown on the summary card. Popup children receive hass separately. */
+  protected abstract entityIds(): (string | undefined)[];
+  // HA replaces hass on every state change anywhere in the house. Re-render only
+  // for changes this card shows; still forward hass so popup children stay live.
+  protected shouldUpdate(changed: PropertyValues) {
+    const old = changed.get('hass') as HomeAssistant | undefined;
+    if (changed.size !== 1 || !old || !this.hass || !this.config) return true;
+    const hass = this.hass;
+    const relevant = old.themes !== hass.themes || old.locale !== hass.locale || old.language !== hass.language || old.config !== hass.config
+      || this.entityIds().some(id => id && old.states[id] !== hass.states[id]);
+    if (relevant) return true;
+    const popup = this.renderRoot.querySelector<HomeOverviewPopup>('home-overview-popup');
+    if (popup) popup.hass = hass;
+    return false;
+  }
   protected render() {
     if (!this.config) return nothing;
     this.toggleAttribute('editor-preview', this.editorPreview);

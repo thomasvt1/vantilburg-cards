@@ -28,6 +28,19 @@ jobs:
       - run: npm run build
       - run: npm run check:examples
       - run: npm test
+      - name: Cache Bubble Card fixture
+        uses: actions/cache@v4
+        with:
+          path: .cache/bubble-card.js
+          key: bubble-card-${{ hashFiles('scripts/fetch-bubble.mjs') }}
+      - name: Resolve Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright-core'].version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-headless-shell
       - name: Install headless Chromium
         run: npx playwright install --only-shell chromium
         timeout-minutes: 2
