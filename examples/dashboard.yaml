@@ -54,3 +54,68 @@ views:
             tap_action:
               action: more-info
               entity: light.hallway
+  - title: Energy
+    path: energy
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: custom:home-power-card
+            name: Home
+            icon: mdi:home-lightning-bolt-outline
+            palette: slate
+            entity: sensor.home_power
+          - type: custom:home-power-card
+            name: Solar
+            icon: mdi:solar-power
+            palette: peach
+            entity: sensor.solar_power
+          - type: custom:home-power-card
+            name: Grid
+            icon: mdi:transmission-tower
+            palette: blue
+            entity: sensor.grid_power
+          - type: custom:home-power-card
+            name: Battery
+            icon: mdi:battery-50
+            palette: teal
+            entity: sensor.battery_state_of_charge
+            secondary_entity: sensor.battery_power
+          - type: custom:home-house-card
+            name: Grid phases
+            icon: mdi:current-ac
+            meters:
+              - entity: sensor.phase_1_current
+                name: L1
+                max: 25
+                palette: blue
+              - entity: sensor.phase_2_current
+                name: L2
+                max: 25
+                palette: blue
+              - entity: sensor.phase_3_current
+                name: L3
+                max: 25
+                palette: blue
+      - type: grid
+        cards:
+          - type: custom:home-energy-card
+            name: Heating & hot water
+            icon: mdi:heat-pump-outline
+            palette: purple
+            home_entity: sensor.home_power
+            devices:
+              - entity: sensor.heat_pump_power
+                name: Heat pump
+              - entity: sensor.boiling_water_tap_power
+                name: Boiling-water tap
+          - type: custom:home-energy-card
+            name: Not metered
+            icon: mdi:meter-electric-outline
+            palette: neutral
+            home_entity: sensor.home_power
+            remainder: true
+            devices:
+              - entity: sensor.heat_pump_power
+              - entity: sensor.boiling_water_tap_power

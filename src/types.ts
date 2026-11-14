@@ -40,10 +40,21 @@ export interface RoomConfig extends CommonConfig {
   display?: 'auto' | 'temperature' | 'lights';
   precision?: number;
 }
-export interface MeterConfig { entity: string; name: string; palette?: Palette }
+export interface MeterConfig { entity: string; name: string; palette?: Palette; max?: number }
 export interface HouseConfig extends CommonConfig { type: 'custom:home-house-card'; meters: MeterConfig[] }
 export interface WasteConfig extends CommonConfig {
   type: 'custom:home-waste-card'; entity: string; type_entity?: string; moved_entity?: string;
   type_names?: Record<string, string>;
 }
-export type CardConfig = RoomConfig | HouseConfig | WasteConfig;
+export interface EnergyDevice { entity: string; name?: string }
+export interface EnergyConfig extends CommonConfig {
+  type: 'custom:home-energy-card';
+  devices: EnergyDevice[];
+  home_entity?: string;
+  remainder?: boolean;
+  idle_threshold?: number;
+}
+export interface PowerConfig extends CommonConfig {
+  type: 'custom:home-power-card'; entity: string; secondary_entity?: string; precision?: number;
+}
+export type CardConfig = RoomConfig | HouseConfig | WasteConfig | EnergyConfig | PowerConfig;

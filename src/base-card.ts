@@ -42,6 +42,19 @@ export abstract class BaseCard extends LitElement {
     .track { flex:1; height:6px; border-radius:8px; background:var(--meter-track); overflow:hidden; }
     .fill { height:100%; border-radius:inherit; background:var(--meter-fill); }
     .track.unavailable { opacity:.55; }
+    .power { container-type:inline-size; }
+    .power .value:not(.small) { white-space:nowrap; overflow-wrap:normal; font-size:clamp(17px,12cqi,23px); }
+    .room .value .sub { display:block; white-space:normal; font-size:13px; font-weight:400; line-height:1.4; margin-top:2px; color:var(--secondary-text-color,#526170); }
+    .energy-head { display:grid; grid-template-columns:44px minmax(0,1fr) auto; align-items:center; gap:12px; }
+    .energy-head.action { grid-template-columns:44px minmax(0,1fr) auto 14px; }
+    .total { font-size:23px; font-weight:600; line-height:1.2; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .total.small { font-size:14px; font-weight:400; color:var(--secondary-text-color,#526170); }
+    .share { display:block; flex:none; margin-top:14px; }
+    .devices { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:2px; }
+    .devices li { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:28px; font-size:14px; line-height:1.35; }
+    .devices .device-name { min-width:0; overflow-wrap:anywhere; }
+    .devices .reading { font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .devices .idle .reading { font-weight:400; color:var(--secondary-text-color,#526170); }
     .preview-switch { display:flex; gap:4px; margin-bottom:12px; padding:4px; border:1px solid var(--divider-color,#ddd); border-radius:12px; }
     .preview-switch button { width:auto; flex:1; min-height:40px; padding:8px 12px; text-align:center; border-radius:8px; color:var(--primary-text-color,#17212c); }
     .preview-switch button[aria-pressed="true"] { background:var(--hoc-icon-bg); color:var(--hoc-accent); font-weight:600; }
@@ -51,7 +64,7 @@ export abstract class BaseCard extends LitElement {
   static getConfigElement() { return document.createElement('home-overview-card-editor'); }
   getCardSize() { return 2; }
   private get editorPreview() { return this.preview && !!previewOwner(this); }
-  getGridOptions() { return { columns: this.editorPreview && this.config?.popup && previewMode(this) === 'popup' ? 12 : this.config?.type === 'custom:home-room-card' ? 6 : 12, rows: 'auto', min_columns: 3 }; }
+  getGridOptions() { return { columns: this.editorPreview && this.config?.popup && previewMode(this) === 'popup' ? 12 : ['custom:home-room-card', 'custom:home-power-card'].includes(this.config?.type) ? 6 : 12, rows: 'auto', min_columns: 3 }; }
   private changePreview(mode: PreviewMode) {
     setPreviewMode(this, mode);
     this.requestUpdate();
@@ -62,6 +75,8 @@ export abstract class BaseCard extends LitElement {
   protected colors(palette: Palette) { return palettes[palette][this.dark ? 'dark' : 'light']; }
   protected abstract content(): unknown;
   protected abstract get defaultPalette(): Palette;
+  /** Popup heading when the card has no name. */
+  protected abstract get defaultName(): string;
   /** Entities shown on the summary card. Popup children receive hass separately. */
   protected abstract entityIds(): (string | undefined)[];
   // HA replaces hass on every state change anywhere in the house. Re-render only
@@ -91,16 +106,19 @@ export abstract class BaseCard extends LitElement {
     const showPopup = this.editorPreview && this.config.popup && previewMode(this) === 'popup';
     return html`${this.editorPreview && this.config.popup ? html`<div class="preview-switch" role="group" aria-label="Preview"><button type="button" aria-pressed=${!showPopup} @click=${() => this.changePreview('card')}>Card</button><button type="button" aria-pressed=${!!showPopup} @click=${() => this.changePreview('popup')}>Popup</button></div>` : nothing}
       ${showPopup ? nothing : html`<ha-card>${this.content()}</ha-card>`}
-      ${this.config.popup && (!this.preview || showPopup) ? html`<home-overview-popup .inline=${this.preview} .config=${this.config.popup} .hass=${this.hass} .title=${this.config.name || (this.config.type === 'custom:home-room-card' ? this.t.room : this.config.type === 'custom:home-house-card' ? this.t.house : this.t.waste)} .icon=${this.config.icon || 'mdi:home-outline'}></home-overview-popup>` : nothing}`;
+      ${this.config.popup && (!this.preview || showPopup) ? html`<home-overview-popup .inline=${this.preview} .config=${this.config.popup} .hass=${this.hass} .title=${this.config.name || this.defaultName} .icon=${this.config.icon || 'mdi:home-outline'}></home-overview-popup>` : nothing}`;
   }
   protected shell(body: unknown, className = '') {
-    const action = this.config.tap_action;
-    return this.config.popup || action && action.action !== 'none'
+    return this.actionable
       ? html`<button class=${className} @click=${this.activate}>${body}</button>`
       : html`<div class=${`surface ${className}`}>${body}</div>`;
   }
   protected row(name: string, icon: string, value: unknown, small = false, secondary = false) {
-    return html`<div class="row"><span class="badge" aria-hidden="true"><ha-icon .icon=${icon}></ha-icon></span><div><div class="name">${name}</div><div class=${`value ${small ? 'small' : ''} ${secondary ? 'secondary' : ''}`}>${value}</div></div>${this.config.popup || this.config.tap_action && this.config.tap_action.action !== 'none' ? html`<svg class="arrow" viewBox="0 0 16 24" aria-hidden="true"><path d="m5 8 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` : nothing}</div>`;
+    return html`<div class="row"><span class="badge" aria-hidden="true"><ha-icon .icon=${icon}></ha-icon></span><div><div class="name">${name}</div><div class=${`value ${small ? 'small' : ''} ${secondary ? 'secondary' : ''}`}>${value}</div></div>${this.arrow()}</div>`;
+  }
+  protected get actionable() { return !!this.config.popup || !!this.config.tap_action && this.config.tap_action.action !== 'none'; }
+  protected arrow() {
+    return this.actionable ? html`<svg class="arrow" viewBox="0 0 16 24" aria-hidden="true"><path d="m5 8 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` : nothing;
   }
   private activate() {
     if (this.preview) { if (this.editorPreview && this.config.popup) this.changePreview('popup'); return; }

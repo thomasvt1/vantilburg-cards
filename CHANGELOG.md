@@ -1,7 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 — 2026-11-14
 
+- Add the Energy group card: a group of power sensors with its combined draw, share of home use and devices listed by draw, idle devices muted and unavailable devices kept explicit.
+- Add a remainder mode to the Energy group card that shows home use not measured by plugs.
+- Add the Power card: one power or percentage tile with an optional second reading.
+- Let House meters take a `max`, so non-percentage readings such as phase current show their unit against a full scale.
+- Visual editors for the new cards, a device list editor and example screenshots for both cards.
 - Re-render cards only when their own entities, theme, locale or units change; still forward state to popup children.
 - Rebuild the Bubble popup configuration only when the popup, title, icon or theme changes.
 - Create the popup after a disconnect/reconnect interrupts loading, instead of waiting for the next state update.

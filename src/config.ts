@@ -1,11 +1,12 @@
 import { palettes } from './appearance';
 import type { CardConfig } from './types';
 const entityId = /^[a-z_]+\.[a-z0-9_]+$/;
+export const cardTypes = ['custom:home-room-card', 'custom:home-house-card', 'custom:home-waste-card', 'custom:home-energy-card', 'custom:home-power-card'];
 function entity(value: unknown, field: string) {
   if (typeof value !== 'string' || !entityId.test(value)) throw new Error(`${field} must be an entity ID.`);
 }
 export function validateConfig(config: CardConfig) {
-  if (!config || !['custom:home-room-card', 'custom:home-house-card', 'custom:home-waste-card'].includes(config.type)) throw new Error('Select a vanTilburg card type.');
+  if (!config || !cardTypes.includes(config.type)) throw new Error('Select a vanTilburg card type.');
   for (const key of ['name', 'icon'] as const) if (config[key] !== undefined && typeof config[key] !== 'string') throw new Error(`${key} must be text.`);
   if (config.palette !== undefined && !Object.hasOwn(palettes, config.palette)) throw new Error('Choose a supported palette.');
   if (config.language !== undefined && !['auto', 'en', 'nl'].includes(config.language)) throw new Error('language must be auto, en or nl.');
@@ -58,6 +59,7 @@ export function validateConfig(config: CardConfig) {
       entity(meter.entity, 'meters.entity');
       if (typeof meter.name !== 'string' || !meter.name.trim()) throw new Error('Each meter needs a name.');
       if (meter.palette !== undefined && !Object.hasOwn(palettes, meter.palette)) throw new Error('Choose a supported meter palette.');
+      if (meter.max !== undefined && (typeof meter.max !== 'number' || !Number.isFinite(meter.max) || meter.max <= 0)) throw new Error('Meter max must be a positive number.');
     }
     if (action?.action === 'more-info' && !action.entity) throw new Error('Select a tap_action.entity for more-info.');
   }
@@ -66,5 +68,23 @@ export function validateConfig(config: CardConfig) {
     if (config.type_entity !== undefined) entity(config.type_entity, 'type_entity');
     if (config.moved_entity !== undefined) entity(config.moved_entity, 'moved_entity');
     if (config.type_names !== undefined && (!config.type_names || typeof config.type_names !== 'object' || Array.isArray(config.type_names) || Object.values(config.type_names).some(v => typeof v !== 'string'))) throw new Error('type_names must map waste types to labels.');
+  }
+  if (config.type === 'custom:home-energy-card') {
+    if (!Array.isArray(config.devices) || !config.devices.length || config.devices.length > 30) throw new Error('devices must contain 1 to 30 power sensors.');
+    for (const device of config.devices) {
+      if (!device || typeof device !== 'object') throw new Error('Each device must be an object.');
+      entity(device.entity, 'devices.entity');
+      if (device.name !== undefined && typeof device.name !== 'string') throw new Error('Device names must be text.');
+    }
+    if (config.home_entity !== undefined) entity(config.home_entity, 'home_entity');
+    if (config.remainder !== undefined && typeof config.remainder !== 'boolean') throw new Error('remainder must be true or false.');
+    if (config.remainder && !config.home_entity) throw new Error('Select a home consumption entity to show the unmetered remainder.');
+    if (config.idle_threshold !== undefined && (typeof config.idle_threshold !== 'number' || !Number.isFinite(config.idle_threshold) || config.idle_threshold < 0 || config.idle_threshold > 1000)) throw new Error('idle_threshold must be between 0 and 1000 W.');
+    if (action?.action === 'more-info' && !action.entity) throw new Error('Select a tap_action.entity for more-info.');
+  }
+  if (config.type === 'custom:home-power-card') {
+    entity(config.entity, 'entity');
+    if (config.secondary_entity !== undefined) entity(config.secondary_entity, 'secondary_entity');
+    if (config.precision !== undefined && (!Number.isInteger(config.precision) || config.precision < 0 || config.precision > 3)) throw new Error('precision must be an integer from 0 to 3.');
   }
 }

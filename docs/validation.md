@@ -15,7 +15,11 @@ The live visual editor added a section and a native child card, and saved a chan
 
 ## Repository conventions
 
-The example generator captures all three registered cards, the popup and the editor preview in both themes at desktop and phone widths. It writes 24 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems. The source digest covers the rendering source and scripts plus the installed versions of Lit, `@mdi/js` and Playwright from `package-lock.json`; the package version and unrelated development tooling do not invalidate the screenshots.
+The example generator captures every registered card, the popup and the editor preview in both themes at desktop and phone widths. It writes 32 PNGs, a source/output SHA-256 manifest and the README gallery. The freshness check normalizes source line endings; it does not compare image pixels between operating systems. The source digest covers the rendering source and scripts plus the installed versions of Lit, `@mdi/js` and Playwright from `package-lock.json`; the package version and unrelated development tooling do not invalidate the screenshots.
+
+## Energy group and power cards — 0.4.0
+
+Ten unit tests cover power-unit conversion (W/kW/MW, rejecting kWh and unitless readings), W/kW formatting in English and Dutch, group totals with unavailable devices, idle/standby subtitles, ordering by draw, the clamped unmetered remainder, power-tile formatting, scaled House meters and validation. Five browser tests cover rendering, the share-of-home progress bar, re-rendering only for the group's own entities, remainder mode, the power tile, phase meters and the device list editor. The suite now contains 27 unit tests and 28 browser tests. The new cards have not yet been loaded in a live Home Assistant instance.
 
 ## Editor popup preview — 0.2.0
 
